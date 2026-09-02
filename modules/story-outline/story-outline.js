@@ -321,7 +321,7 @@ function getOutlineStore() {
     if (!chat_metadata) return null;
     const ext = chat_metadata.extensions ||= {}, lwb = ext[EXT_ID] ||= {};
     return lwb.storyOutline ||= {
-        mapData: null, stage: 0, deviationScore: 0, simulationTarget: 5, playerLocation: '家',
+        mapData: null, stage: 0, deviationScore: 0, simulationTarget: 5, playerLocation: 'Không rõ',
         outlineData: { meta: null, world: null, outdoor: null, indoor: null, sceneSetup: null, strangers: null, contacts: null },
         dataChecked: { meta: true, world: true, outdoor: true, indoor: true, sceneSetup: true, strangers: false, contacts: false, characterContactSms: false }
     };
@@ -337,7 +337,7 @@ const saveCommSettings = s => setStore(STORAGE_KEYS.comm, s);
 function getCharInfo() {
     const ctx = getContext(), char = ctx.characters?.[ctx.characterId];
     return {
-        name: char?.name || char?.data?.name || char?.avatar || '角色卡',
+        name: char?.name || char?.data?.name || char?.avatar || 'Thẻ nhân vật',
         desc: String((char?.description ?? char?.data?.description ?? '') || '').trim() || '{{description}}'
     };
 }
@@ -565,26 +565,26 @@ function formatOutlinePrompt() {
     if (!store?.outlineData) return "";
 
     const { outlineData: d, dataChecked: c, playerLocation } = store, stage = store.stage ?? 0;
-    let text = "## Story Outline (剧情数据)\n\n", has = false;
+    let text = "## Story Outline (Dữ liệu cốt truyện)\n\n", has = false;
 
     // 世界真相
     if (c?.meta && d.meta?.truth) {
         has = true;
-        text += "### 世界真相 (World Truth)\n> 注意：以下信息仅供生成逻辑参考，不可告知玩家。\n";
-        if (d.meta.truth.background) text += `* 背景真相: ${d.meta.truth.background}\n`;
+        text += "### Sự thật thế giới (World Truth)\n> Lưu ý: Thông tin sau chỉ dùng để tham khảo logic tạo, KHÔNG tiết lộ cho người chơi.\n";
+        if (d.meta.truth.background) text += `* Bối cảnh sự thật: ${d.meta.truth.background}\n`;
         const dr = d.meta.truth.driver;
-        if (dr) { if (dr.source) text += `* 驱动: ${dr.source}\n`; if (dr.target_end) text += `* 目的: ${dr.target_end}\n`; if (dr.tactic) text += `* 当前手段: ${dr.tactic}\n`; }
+        if (dr) { if (dr.source) text += `* Kẻ giật dây: ${dr.source}\n`; if (dr.target_end) text += `* Mục đích: ${dr.target_end}\n`; if (dr.tactic) text += `* Thủ đoạn hiện tại: ${dr.tactic}\n`; }
 
         // 当前气氛
         const atm = d.meta.atmosphere?.current;
         if (atm) {
-            if (atm.environmental) text += `* 当前气氛: ${atm.environmental}\n`;
-            if (atm.npc_attitudes) text += `* NPC态度: ${atm.npc_attitudes}\n`;
+            if (atm.environmental) text += `* Không khí hiện tại: ${atm.environmental}\n`;
+            if (atm.npc_attitudes) text += `* Thái độ NPC: ${atm.npc_attitudes}\n`;
         }
 
         const onion = d.meta.onion_layers || d.meta.truth.onion_layers;
         if (onion) {
-            text += "* 当前可见层级:\n";
+            text += "* Cấp độ hiển thị hiện tại:\n";
             getVisibleLayers(stage).forEach(k => {
                 const l = onion[k]; if (!l || !Array.isArray(l) || !l.length) return;
                 const name = k.replace(/_/g, ' - ');
@@ -595,35 +595,35 @@ function formatOutlinePrompt() {
     }
 
     // 世界资讯
-    if (c?.world && d.world?.news?.length) { has = true; text += "### 世界资讯 (News)\n"; d.world.news.forEach(n => { text += `* ${n.title}: ${n.content}\n`; }); text += "\n"; }
+    if (c?.world && d.world?.news?.length) { has = true; text += "### Tin tức thế giới (News)\n"; d.world.news.forEach(n => { text += `* ${n.title}: ${n.content}\n`; }); text += "\n"; }
 
     // 环境信息
     let mapC = "", locNode = null;
     if (c?.outdoor && d.outdoor) {
-        if (d.outdoor.description) mapC += `> 大地图环境: ${d.outdoor.description}\n`;
+        if (d.outdoor.description) mapC += `> Môi trường bản đồ lớn: ${d.outdoor.description}\n`;
         if (playerLocation && d.outdoor.nodes?.length) locNode = d.outdoor.nodes.find(n => n.name === playerLocation);
     }
     if (!locNode && c?.indoor && d.indoor?.nodes?.length && playerLocation) locNode = d.indoor.nodes.find(n => n.name === playerLocation);
     const indoorMap = (c?.indoor && playerLocation && d.indoor && typeof d.indoor === 'object' && !Array.isArray(d.indoor)) ? d.indoor[playerLocation] : null;
     const locText = indoorMap?.description || locNode?.info || '';
-    if (playerLocation && locText) mapC += `\n> 当前地点 (${playerLocation}):\n${locText}\n`;
-    if (c?.indoor && d.indoor && !locNode && !indoorMap && d.indoor.description) { mapC += d.indoor.name ? `\n> 当前地点: ${d.indoor.name}\n` : "\n> 局部区域:\n"; mapC += `${d.indoor.description}\n`; }
-    if (mapC) { has = true; text += `### 环境信息 (Environment)\n${mapC}\n`; }
+    if (playerLocation && locText) mapC += `\n> Địa điểm hiện tại (${playerLocation}):\n${locText}\n`;
+    if (c?.indoor && d.indoor && !locNode && !indoorMap && d.indoor.description) { mapC += d.indoor.name ? `\n> Địa điểm hiện tại: ${d.indoor.name}\n` : "\n> Khu vực cục bộ:\n"; mapC += `${d.indoor.description}\n`; }
+    if (mapC) { has = true; text += `### Thông tin môi trường (Environment)\n${mapC}\n`; }
 
     // 周边人物
     let charC = "";
-    if (c?.contacts && d.contacts?.length) { charC += "* 联络人:\n"; d.contacts.forEach(p => charC += `  - ${p.name}${p.location ? ` @ ${p.location}` : ''}: ${p.info || ''}\n`); }
-    if (c?.strangers && d.strangers?.length) { charC += "* 陌路人:\n"; d.strangers.forEach(p => charC += `  - ${p.name}${p.location ? ` @ ${p.location}` : ''}: ${p.info || ''}\n`); }
-    if (charC) { has = true; text += `### 周边人物 (Characters)\n${charC}\n`; }
+    if (c?.contacts && d.contacts?.length) { charC += "* Người liên hệ:\n"; d.contacts.forEach(p => charC += `  - ${p.name}${p.location ? ` @ ${p.location}` : ''}: ${p.info || ''}\n`); }
+    if (c?.strangers && d.strangers?.length) { charC += "* Người qua đường:\n"; d.strangers.forEach(p => charC += `  - ${p.name}${p.location ? ` @ ${p.location}` : ''}: ${p.info || ''}\n`); }
+    if (charC) { has = true; text += `### Nhân vật xung quanh (Characters)\n${charC}\n`; }
 
     // 当前剧情
     if (c?.sceneSetup && d.sceneSetup) {
         const ss = d.sceneSetup.sideStory || d.sceneSetup.side_story || d.sceneSetup;
         if (ss && (ss.Facade || ss.Undercurrent)) {
             has = true;
-            text += "### 当前剧情 (Current Scene)\n";
-            if (ss.Facade) text += `* 表现: ${ss.Facade}\n`;
-            if (ss.Undercurrent) text += `* 暗流: ${ss.Undercurrent}\n`;
+            text += "### Cốt truyện hiện tại (Current Scene)\n";
+            if (ss.Facade) text += `* Bề nổi: ${ss.Facade}\n`;
+            if (ss.Undercurrent) text += `* Dòng chảy ngầm: ${ss.Undercurrent}\n`;
             text += "\n";
         }
     }
@@ -634,8 +634,8 @@ function formatOutlinePrompt() {
         const sums = hist?.summaries || {}, sumKeys = Object.keys(sums).filter(k => k !== '_count').sort((a, b) => a - b);
         const msgs = hist?.messages || [], sc = hist?.summarizedCount || 0, rem = msgs.slice(sc);
         if (sumKeys.length || rem.length) {
-            has = true; text += `### ${charName}短信记录\n`;
-            if (sumKeys.length) text += `[摘要] ${sumKeys.map(k => sums[k]).join('；')}\n`;
+            has = true; text += `### Lịch sử tin nhắn của ${charName}\n`;
+            if (sumKeys.length) text += `[Tóm tắt cuộc trò chuyện trước] ${sumKeys.map(k => sums[k]).join('；')}\n\n`;
             if (rem.length) text += rem.map(m => `${m.type === 'sent' ? '{{user}}' : charName}：${m.text}`).join('\n') + "\n";
             text += "\n";
         }
@@ -649,7 +649,7 @@ function ensurePrompt() {
     if (!promptManager) return false;
     let prompt = promptManager.getPromptById(STORY_OUTLINE_ID);
     if (!prompt) {
-        promptManager.addPrompt({ identifier: STORY_OUTLINE_ID, name: '剧情地图', role: 'system', content: '', system_prompt: false, marker: false, extension: true }, STORY_OUTLINE_ID);
+        promptManager.addPrompt({ identifier: STORY_OUTLINE_ID, name: 'Bản đồ cốt truyện', role: 'system', content: '', system_prompt: false, marker: false, extension: true }, STORY_OUTLINE_ID);
         prompt = promptManager.getPromptById(STORY_OUTLINE_ID);
     }
     const char = promptManager.activeCharacter;
@@ -719,7 +719,7 @@ function sendSettings() {
     postFrame({
         type: "LOAD_SETTINGS", globalSettings: getGlobalSettings(), commSettings: getCommSettings(),
         stage: store?.stage ?? 0, deviationScore: store?.deviationScore ?? 0,
-        simulationTarget: store?.simulationTarget ?? 5, playerLocation: store?.playerLocation ?? '家',
+        simulationTarget: store?.simulationTarget ?? 5, playerLocation: store?.playerLocation ?? 'Không rõ',
         dataChecked: store?.dataChecked || {}, outlineData: store?.outlineData || {}, promptConfig: getPromptConfigPayload?.(),
         characterCardName: charName, characterCardDescription: charDesc,
         characterContactSmsHistory: getCharSmsHistory()
@@ -736,7 +736,7 @@ function sendSimStateOnly() {
         stage: store?.stage ?? 0,
         deviationScore: store?.deviationScore ?? 0,
         simulationTarget: store?.simulationTarget ?? 5,
-        playerLocation: store?.playerLocation ?? '家',
+        playerLocation: store?.playerLocation ?? 'Không rõ',
     });
 }
 
@@ -754,7 +754,7 @@ function getCommonPromptVars(extra = {}) {
     const store = getOutlineStore();
     const comm = getCommSettings();
     const mode = getGlobalSettings().mode || 'story';
-    const playerLocation = store?.playerLocation || store?.outlineData?.playerLocation || '未知';
+    const playerLocation = store?.playerLocation || store?.outlineData?.playerLocation || 'Địa điểm không rõ';
     return {
         storyOutline: formatOutlinePrompt(),
         historyCount: comm.historyCount || 50,
@@ -799,7 +799,7 @@ function tickSimCountdown(store) {
     saveMetadataDebounced?.();
     sendSimStateOnly();
     if (prev > 0 && next <= 0) {
-        try { processCommands?.('/echo 该进行世界推演啦！'); } catch { }
+        try { processCommands?.('/echo Đã đến lúc diễn biến thế giới rồi!'); } catch { }
     }
 }
 
@@ -837,7 +837,7 @@ async function handleFetchModels({ apiUrl, apiKey }) {
             for (const ep of ['/api/backends/chat-completions/models', '/api/openai/models']) {
                 try { const r = await fetch(ep, { headers: { 'Content-Type': 'application/json' } }); if (r.ok) { const j = await r.json(); models = (j.data || j || []).map(m => m.id || m.name || m).filter(m => typeof m === 'string'); if (models.length) break; } } catch { }
             }
-            if (!models.length) throw new Error('无法从酒馆获取模型列表');
+            if (!models.length) throw new Error('Không thể lấy danh sách mô hình từ Tavern');
         } else {
             const h = { 'Content-Type': 'application/json', ...(apiKey && { Authorization: `Bearer ${apiKey}` }) };
             let lastStatus = '';
@@ -855,7 +855,7 @@ async function handleFetchModels({ apiUrl, apiKey }) {
                 }
                 if (models.length) break;
             }
-            if (!models.length) throw new Error(lastStatus || '未获取到模型列表');
+            if (!models.length) throw new Error(lastStatus || 'Không lấy được danh sách mô hình');
         }
         postFrame({ type: "FETCH_MODELS_RESULT", models });
     } catch (e) { postFrame({ type: "FETCH_MODELS_RESULT", error: e.message }); }
@@ -863,7 +863,7 @@ async function handleFetchModels({ apiUrl, apiKey }) {
 
 async function handleTestConn({ apiUrl, apiKey, model }) {
     try {
-        if (!apiUrl) { for (const ep of ['/api/backends/chat-completions/status', '/api/openai/models', '/api/backends/chat-completions/models']) { try { if ((await fetch(ep, { headers: { 'Content-Type': 'application/json' } })).ok) { postFrame({ type: "TEST_CONN_RESULT", success: true, message: `连接成功${model ? ` (模型: ${model})` : ''}` }); return; } } catch { } } throw new Error('无法连接到酒馆API'); }
+        if (!apiUrl) { for (const ep of ['/api/backends/chat-completions/status', '/api/openai/models', '/api/backends/chat-completions/models']) { try { if ((await fetch(ep, { headers: { 'Content-Type': 'application/json' } })).ok) { postFrame({ type: "TEST_CONN_RESULT", success: true, message: `Kết nối thành công${model ? ` (Mô hình: ${model})` : ''}` }); return; } } catch { } } throw new Error('Không thể kết nối với API của Tavern'); }
         const h = { 'Content-Type': 'application/json', ...(apiKey && { Authorization: `Bearer ${apiKey}` }) };
         let connected = false;
         for (const url of getModelListCandidateUrls(apiUrl, getDefaultApiPrefix('openai'))) {
@@ -877,30 +877,30 @@ async function handleTestConn({ apiUrl, apiKey, model }) {
                 continue;
             }
         }
-        if (!connected) throw new Error('连接失败');
-        postFrame({ type: "TEST_CONN_RESULT", success: true, message: `连接成功${model ? ` (模型: ${model})` : ''}` });
-    } catch (e) { postFrame({ type: "TEST_CONN_RESULT", success: false, message: `连接失败: ${e.message}` }); }
+        if (!connected) throw new Error('Kết nối thất bại');
+        postFrame({ type: "TEST_CONN_RESULT", success: true, message: `Kết nối thành công${model ? ` (Mô hình: ${model})` : ''}` });
+    } catch (e) { postFrame({ type: "TEST_CONN_RESULT", success: false, message: `Kết nối thất bại: ${e.message}` }); }
 }
 
 async function handleCheckUid({ uid, requestId }) {
     const num = parseInt(uid, 10);
-    if (!uid?.trim() || isNaN(num)) return replyErr("CHECK_WORLDBOOK_UID_RESULT", requestId, isNaN(num) ? 'UID必须是数字' : '请输入有效的UID');
+    if (!uid?.trim() || isNaN(num)) return replyErr("CHECK_WORLDBOOK_UID_RESULT", requestId, isNaN(num) ? 'UID phải là số' : 'Vui lòng nhập UID hợp lệ');
     const books = await getCharWorldbooks();
-    if (!books.length) return replyErr("CHECK_WORLDBOOK_UID_RESULT", requestId, '当前角色卡没有绑定世界书');
+    if (!books.length) return replyErr("CHECK_WORLDBOOK_UID_RESULT", requestId, 'Thẻ nhân vật hiện tại chưa liên kết với Worldbook');
     for (const book of books) {
         const data = await loadWorldInfo(book), entry = data?.entries?.[num];
         if (entry) {
             const keys = Array.isArray(entry.key) ? entry.key : [];
-            if (!keys.length) return replyErr("CHECK_WORLDBOOK_UID_RESULT", requestId, `在「${book}」中找到条目 UID ${uid}，但没有主要关键字`);
+            if (!keys.length) return replyErr("CHECK_WORLDBOOK_UID_RESULT", requestId, `Trong 「${book}」tìm thấy UID mục ${uid}, nhưng không có từ khóa chính`);
             return reply("CHECK_WORLDBOOK_UID_RESULT", requestId, { primaryKeys: keys, worldbook: book, comment: entry.comment || '' });
         }
     }
-    replyErr("CHECK_WORLDBOOK_UID_RESULT", requestId, `在角色卡绑定的世界书中未找到 UID 为 ${uid} 的条目`);
+    replyErr("CHECK_WORLDBOOK_UID_RESULT", requestId, `Không tìm thấy UID ${uid} trong Worldbook liên kết với thẻ nhân vật`);
 }
 
 async function handleSendSms({ requestId, contactName, worldbookUid, userMessage, chatHistory, summarizedCount }) {
     try {
-        const ctx = getContext(), userName = name1 || ctx.name1 || '用户';
+        const ctx = getContext(), userName = name1 || ctx.name1 || 'Người dùng';
         let charContent = '', existSum = {}, sc = summarizedCount || 0;
 
         if (worldbookUid === CHAR_CARD_UID) {
@@ -918,13 +918,13 @@ async function handleSendSms({ requestId, contactName, worldbookUid, userMessage
 
         let histText = '';
         const sumKeys = Object.keys(existSum).filter(k => k !== '_count').sort((a, b) => a - b);
-        if (sumKeys.length) histText = `[之前的对话摘要] ${sumKeys.map(k => existSum[k]).join('；')}\n\n`;
+        if (sumKeys.length) histText = `[Tóm tắt cuộc trò chuyện trước] ${sumKeys.map(k => existSum[k]).join('；')}\n\n`;
         if (chatHistory?.length > 1) { const msgs = chatHistory.slice(sc, -1); if (msgs.length) histText += msgs.map(m => `${m.type === 'sent' ? userName : contactName}：${m.text}`).join('\n'); }
 
         const msgs = buildSmsMessages(getCommonPromptVars({ contactName, userName, smsHistoryContent: buildSmsHistoryContent(histText), userMessage, characterContent: charContent }));
         const parsed = await callLLMJson({ messages: msgs, validate: V.sms });
-        reply('SMS_RESULT', requestId, parsed?.reply ? { reply: parsed.reply } : { error: '生成回复失败，请调整重试' });
-    } catch (e) { replyErr('SMS_RESULT', requestId, `生成失败: ${e.message}`); }
+        reply('SMS_RESULT', requestId, parsed?.reply ? { reply: parsed.reply } : { error: 'Tạo câu trả lời thất bại, vui lòng điều chỉnh và thử lại' });
+    } catch (e) { replyErr('SMS_RESULT', requestId, `Tạo thất bại: ${e.message}`); }
 }
 
 async function handleLoadSmsHistory({ worldbookUid }) {
@@ -939,7 +939,7 @@ async function handleLoadSmsHistory({ worldbookUid }) {
 async function handleSaveSmsHistory({ worldbookUid, messages, contactName, summarizedCount }) {
     if (worldbookUid === CHAR_CARD_UID) { const h = getCharSmsHistory(); if (!h) return; h.messages = Array.isArray(messages) ? messages : []; h.summarizedCount = summarizedCount || 0; if (!h.messages.length) { h.summarizedCount = 0; h.summaries = {}; } saveMetadataDebounced?.(); return; }
     const e = await findEntry(worldbookUid); if (!e) return;
-    const { bookName, entry: en, worldData } = e; let c = en.content || ''; const cn = contactName || en.key?.[0] || '角色'; let existSum = '';
+    const { bookName, entry: en, worldData } = e; let c = en.content || ''; const cn = contactName || en.key?.[0] || 'Nhân vật'; let existSum = '';
     const [s, ed] = [c.indexOf('[SMS_HISTORY_START]'), c.indexOf('[SMS_HISTORY_END]')];
     if (s !== -1 && ed !== -1) { const p = safe(() => JSON.parse(c.substring(s + 19, ed).trim())); existSum = p?.find?.(i => typeof i === 'string' && i.startsWith('SMS_summary:')) || ''; c = c.substring(0, s).trimEnd() + c.substring(ed + 17); }
     if (messages?.length) { const sc = summarizedCount || 0, simp = messages.slice(sc).map(m => `${m.type === 'sent' ? '{{user}}' : cn}:${m.text}`); const arr = existSum ? [existSum, ...simp] : simp; c = c.trimEnd() + `\n\n[SMS_HISTORY_START]\n${JSON.stringify(arr)}\n[SMS_HISTORY_END]`; }
@@ -949,19 +949,19 @@ async function handleSaveSmsHistory({ worldbookUid, messages, contactName, summa
 async function handleCompressSms({ requestId, worldbookUid, messages, contactName, summarizedCount }) {
     const sc = summarizedCount || 0;
     try {
-        const ctx = getContext(), userName = name1 || ctx.name1 || '用户';
+        const ctx = getContext(), userName = name1 || ctx.name1 || 'Người dùng';
         let e = null, existSum = {};
 
         if (worldbookUid === CHAR_CARD_UID) {
             const h = getCharSmsHistory(); existSum = h?.summaries || {};
             const keep = 4, toEnd = Math.max(sc, (messages?.length || 0) - keep);
-            if (toEnd <= sc) return replyErr('COMPRESS_SMS_RESULT', requestId, '没有足够的新消息需要总结');
-            const toSum = (messages || []).slice(sc, toEnd); if (toSum.length < 2) return replyErr('COMPRESS_SMS_RESULT', requestId, '需要至少2条消息才能进行总结');
+            if (toEnd <= sc) return replyErr('COMPRESS_SMS_RESULT', requestId, 'Không có đủ tin nhắn mới để tóm tắt');
+            const toSum = (messages || []).slice(sc, toEnd); if (toSum.length < 2) return replyErr('COMPRESS_SMS_RESULT', requestId, 'Cần ít nhất 2 tin nhắn để tóm tắt');
             const convText = toSum.map(m => `${m.type === 'sent' ? userName : contactName}：${m.text}`).join('\n');
             const sumKeys = Object.keys(existSum).filter(k => k !== '_count').sort((a, b) => a - b);
             const existText = sumKeys.map(k => `${k}. ${existSum[k]}`).join('\n');
             const parsed = await callLLMJson({ messages: buildSummaryMessages(getCommonPromptVars({ existingSummaryContent: buildExistingSummaryContent(existText), conversationText: convText })), validate: V.sum });
-            const sum = parsed?.summary?.trim?.(); if (!sum) return replyErr('COMPRESS_SMS_RESULT', requestId, 'ECHO：总结生成出错，请重试');
+            const sum = parsed?.summary?.trim?.(); if (!sum) return replyErr('COMPRESS_SMS_RESULT', requestId, 'ECHO: Lỗi tạo tóm tắt, vui lòng thử lại');
             const nextK = Math.max(0, ...Object.keys(existSum).filter(k => k !== '_count').map(k => parseInt(k, 10)).filter(n => !isNaN(n))) + 1;
             existSum[String(nextK)] = sum;
             if (h) { h.messages = Array.isArray(messages) ? messages : (h.messages || []); h.summarizedCount = toEnd; h.summaries = existSum; saveMetadataDebounced?.(); }
@@ -972,17 +972,17 @@ async function handleCompressSms({ requestId, worldbookUid, messages, contactNam
         if (e?.entry) { const c = e.entry.content || '', [s, ed] = [c.indexOf('[SMS_HISTORY_START]'), c.indexOf('[SMS_HISTORY_END]')]; if (s !== -1 && ed !== -1) { const p = safe(() => JSON.parse(c.substring(s + 19, ed).trim())); const si = p?.find?.(i => typeof i === 'string' && i.startsWith('SMS_summary:')); if (si) existSum = safe(() => JSON.parse(si.substring(12))) || {}; } }
 
         const keep = 4, toEnd = Math.max(sc, messages.length - keep);
-        if (toEnd <= sc) return replyErr('COMPRESS_SMS_RESULT', requestId, '没有足够的新消息需要总结');
-        const toSum = messages.slice(sc, toEnd); if (toSum.length < 2) return replyErr('COMPRESS_SMS_RESULT', requestId, '需要至少2条消息才能进行总结');
+        if (toEnd <= sc) return replyErr('COMPRESS_SMS_RESULT', requestId, 'Không có đủ tin nhắn mới để tóm tắt');
+        const toSum = messages.slice(sc, toEnd); if (toSum.length < 2) return replyErr('COMPRESS_SMS_RESULT', requestId, 'Cần ít nhất 2 tin nhắn để tóm tắt');
         const convText = toSum.map(m => `${m.type === 'sent' ? userName : contactName}：${m.text}`).join('\n');
         const sumKeys = Object.keys(existSum).filter(k => k !== '_count').sort((a, b) => a - b);
         const existText = sumKeys.map(k => `${k}. ${existSum[k]}`).join('\n');
         const parsed = await callLLMJson({ messages: buildSummaryMessages(getCommonPromptVars({ existingSummaryContent: buildExistingSummaryContent(existText), conversationText: convText })), validate: V.sum });
-        const sum = parsed?.summary?.trim?.(); if (!sum) return replyErr('COMPRESS_SMS_RESULT', requestId, 'ECHO：总结生成出错，请重试');
+        const sum = parsed?.summary?.trim?.(); if (!sum) return replyErr('COMPRESS_SMS_RESULT', requestId, 'ECHO: Lỗi tạo tóm tắt, vui lòng thử lại');
         const newSc = toEnd;
 
         if (e) {
-            const { bookName, entry: en, worldData } = e; let c = en.content || ''; const cn = contactName || en.key?.[0] || '角色';
+            const { bookName, entry: en, worldData } = e; let c = en.content || ''; const cn = contactName || en.key?.[0] || 'Nhân vật';
             const [s, ed] = [c.indexOf('[SMS_HISTORY_START]'), c.indexOf('[SMS_HISTORY_END]')]; if (s !== -1 && ed !== -1) c = c.substring(0, s).trimEnd() + c.substring(ed + 17);
             const nextK = Math.max(0, ...Object.keys(existSum).filter(k => k !== '_count').map(k => parseInt(k, 10)).filter(n => !isNaN(n))) + 1;
             existSum[String(nextK)] = sum;
@@ -992,7 +992,7 @@ async function handleCompressSms({ requestId, worldbookUid, messages, contactNam
             en.content = c.trim(); await saveWorldInfo(bookName, worldData);
         }
         reply('COMPRESS_SMS_RESULT', requestId, { summary: sum, newSummarizedCount: newSc });
-    } catch (e) { replyErr('COMPRESS_SMS_RESULT', requestId, `压缩失败: ${e.message}`); }
+    } catch (e) { replyErr('COMPRESS_SMS_RESULT', requestId, `Nén thất bại: ${e.message}`); }
 }
 
 async function handleCheckStrangerWb({ requestId, strangerName }) {
@@ -1004,45 +1004,45 @@ async function handleGenNpc({ requestId, strangerName, strangerInfo, npcType = '
     try {
         const comm = getCommSettings();
         const ctx = getContext(), char = ctx.characters?.[ctx.characterId];
-        if (!char) return replyErr('GENERATE_NPC_RESULT', requestId, '未找到当前角色卡');
+        if (!char) return replyErr('GENERATE_NPC_RESULT', requestId, 'Không tìm thấy thẻ nhân vật hiện tại');
         const primary = char.data?.extensions?.world;
-        if (!primary || !world_names?.includes(primary)) return replyErr('GENERATE_NPC_RESULT', requestId, '角色卡未绑定世界书，请先绑定世界书');
-        const vars = getCommonPromptVars({ strangerName, strangerInfo: strangerInfo || '(无描述)' });
+        if (!primary || !world_names?.includes(primary)) return replyErr('GENERATE_NPC_RESULT', requestId, 'Thẻ nhân vật chưa liên kết Worldbook, vui lòng liên kết trước');
+        const vars = getCommonPromptVars({ strangerName, strangerInfo: strangerInfo || '(Không có mô tả)' });
         const msgs = npcType === 'importantNpc'
             ? buildImportantNpcGenerationMessages(vars)
             : buildNpcGenerationMessages(vars);
         const npc = await callLLMJson({ messages: msgs, validate: V.npc });
-        if (!npc?.name) return replyErr('GENERATE_NPC_RESULT', requestId, 'NPC 生成失败：无法解析 JSON 数据');
-        const wd = await loadWorldInfo(primary); if (!wd) return replyErr('GENERATE_NPC_RESULT', requestId, `无法加载世界书: ${primary}`);
+        if (!npc?.name) return replyErr('GENERATE_NPC_RESULT', requestId, 'Tạo NPC thất bại: Không thể phân tích dữ liệu JSON');
+        const wd = await loadWorldInfo(primary); if (!wd) return replyErr('GENERATE_NPC_RESULT', requestId, `Không thể tải Worldbook: ${primary}`);
         const { createWorldInfoEntry } = await import("../../../../../world-info.js");
-        const newE = createWorldInfoEntry(primary, wd); if (!newE) return replyErr('GENERATE_NPC_RESULT', requestId, '创建世界书条目失败');
+        const newE = createWorldInfoEntry(primary, wd); if (!newE) return replyErr('GENERATE_NPC_RESULT', requestId, 'Tạo mục Worldbook thất bại');
         Object.assign(newE, { key: npc.aliases || [npc.name], comment: npc.name, content: formatNpcToWorldbookContent(npc), constant: false, selective: true, disable: false, position: typeof comm.npcPosition === 'number' ? comm.npcPosition : 0, order: typeof comm.npcOrder === 'number' ? comm.npcOrder : 100 });
         await saveWorldInfo(primary, wd, true);
         reply('GENERATE_NPC_RESULT', requestId, { success: true, npcData: npc, worldbookUid: String(newE.uid), worldbook: primary });
-    } catch (e) { replyErr('GENERATE_NPC_RESULT', requestId, `生成失败: ${e.message}`); }
+    } catch (e) { replyErr('GENERATE_NPC_RESULT', requestId, `Tạo thất bại: ${e.message}`); }
 }
 
 async function handleExtractStrangers({ requestId, existingContacts, existingStrangers }) {
     try {
         const msgs = buildExtractStrangersMessages(getCommonPromptVars({ existingContacts: existingContacts || [], existingStrangers: existingStrangers || [] }));
         const data = await callLLMJson({ messages: msgs, isArray: true, validate: V.arr });
-        if (!Array.isArray(data)) return replyErr('EXTRACT_STRANGERS_RESULT', requestId, '提取失败：无法解析 JSON 数据');
-        const strangers = data.filter(s => s?.name).map(s => ({ name: s.name, avatar: s.name[0] || '?', color: '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'), location: s.location || '未知', info: s.info || '' }));
+        if (!Array.isArray(data)) return replyErr('EXTRACT_STRANGERS_RESULT', requestId, 'Trích xuất thất bại: Không thể phân tích dữ liệu JSON');
+        const strangers = data.filter(s => s?.name).map(s => ({ name: s.name, avatar: s.name[0] || '?', color: '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'), location: s.location || 'Không rõ', info: s.info || '' }));
         reply('EXTRACT_STRANGERS_RESULT', requestId, { success: true, strangers });
-    } catch (e) { replyErr('EXTRACT_STRANGERS_RESULT', requestId, `提取失败: ${e.message}`); }
+    } catch (e) { replyErr('EXTRACT_STRANGERS_RESULT', requestId, `Trích xuất thất bại: ${e.message}`); }
 }
 
 async function handleSceneSwitch({ requestId, prevLocationName, prevLocationInfo, targetLocationName, targetLocationType, targetLocationInfo, playerAction }) {
     try {
         const store = getOutlineStore();
-        const msgs = buildSceneSwitchMessages(getCommonPromptVars({ prevLocationName: prevLocationName || '未知地点', prevLocationInfo: prevLocationInfo || '', targetLocationName: targetLocationName || '未知地点', targetLocationType: targetLocationType || 'sub', targetLocationInfo: targetLocationInfo || '', playerAction: playerAction || '' }));
+        const msgs = buildSceneSwitchMessages(getCommonPromptVars({ prevLocationName: prevLocationName || 'Địa điểm không rõ', prevLocationInfo: prevLocationInfo || 'Không có chi tiết', targetLocationName: targetLocationName || 'Địa điểm không rõ', targetLocationType: targetLocationType || 'sub', targetLocationInfo: targetLocationInfo || 'Không có chi tiết', playerAction: playerAction || 'Không có ý định cụ thể' }));
         const data = await callLLMJson({ messages: msgs, validate: V.scene });
-        if (!data || !V.scene(data)) return replyErr('SCENE_SWITCH_RESULT', requestId, '场景生成失败：无法解析 JSON 数据');
+        if (!data || !V.scene(data)) return replyErr('SCENE_SWITCH_RESULT', requestId, 'Tạo bối cảnh thất bại: Không thể phân tích dữ liệu JSON');
         const delta = data.review?.deviation?.score_delta || 0, old = store?.deviationScore || 0, newS = Math.min(100, Math.max(0, old + delta));
         if (store) { store.deviationScore = newS; tickSimCountdown(store); }
         const lm = data.local_map || data.scene_setup?.local_map || null;
         reply('SCENE_SWITCH_RESULT', requestId, { success: true, sceneData: { review: data.review, localMap: lm, strangers: [], scoreDelta: delta, newScore: newS } });
-    } catch (e) { replyErr('SCENE_SWITCH_RESULT', requestId, `场景切换失败: ${e.message}`); }
+    } catch (e) { replyErr('SCENE_SWITCH_RESULT', requestId, `Chuyển cảnh thất bại: ${e.message}`); }
 }
 
 async function handleExecSlash({ command }) {
@@ -1060,44 +1060,44 @@ async function handleSendInvite({ requestId, contactName, contactUid, targetLoca
         if (contactUid) { const es = Object.values(world_info?.entries || world_info || {}); charC = es.find(e => e.uid?.toString() === contactUid.toString())?.content || ''; }
         const msgs = buildInviteMessages(getCommonPromptVars({ contactName, userName: name1 || '{{user}}', targetLocation, smsHistoryContent: buildSmsHistoryContent(smsHistory || ''), characterContent: charC }));
         const data = await callLLMJson({ messages: msgs, validate: V.inv });
-        if (typeof data?.invite !== 'boolean') return replyErr('SEND_INVITE_RESULT', requestId, '邀请处理失败：无法解析 JSON 数据');
+        if (typeof data?.invite !== 'boolean') return replyErr('SEND_INVITE_RESULT', requestId, 'Xử lý lời mời thất bại: Không thể phân tích dữ liệu JSON');
         reply('SEND_INVITE_RESULT', requestId, { success: true, inviteData: { accepted: data.invite, reply: data.reply, targetLocation } });
-    } catch (e) { replyErr('SEND_INVITE_RESULT', requestId, `邀请处理失败: ${e.message}`); }
+    } catch (e) { replyErr('SEND_INVITE_RESULT', requestId, `Xử lý lời mời thất bại: ${e.message}`); }
 }
 
 async function handleGenLocalMap({ requestId, outdoorDescription }) {
     try {
         const msgs = buildLocalMapGenMessages(getCommonPromptVars({ outdoorDescription: outdoorDescription || '' }));
         const data = await callLLMJson({ messages: msgs, validate: V.lm });
-        if (!data?.inside) return replyErr('GENERATE_LOCAL_MAP_RESULT', requestId, '局部地图生成失败：无法解析 JSON 数据');
+        if (!data?.inside) return replyErr('GENERATE_LOCAL_MAP_RESULT', requestId, 'Tạo bản đồ cục bộ thất bại: Không thể phân tích dữ liệu JSON');
         tickSimCountdown(getOutlineStore());
         reply('GENERATE_LOCAL_MAP_RESULT', requestId, { success: true, localMapData: data.inside });
-    } catch (e) { replyErr('GENERATE_LOCAL_MAP_RESULT', requestId, `局部地图生成失败: ${e.message}`); }
+    } catch (e) { replyErr('GENERATE_LOCAL_MAP_RESULT', requestId, `Tạo bản đồ cục bộ thất bại: ${e.message}`); }
 }
 
 async function handleRefreshLocalMap({ requestId, locationName, currentLocalMap, outdoorDescription }) {
     try {
         const store = getOutlineStore();
-        const msgs = buildLocalMapRefreshMessages(getCommonPromptVars({ locationName: locationName || store?.playerLocation || '未知地点', locationInfo: currentLocalMap?.description || '', currentLocalMap: currentLocalMap || null, outdoorDescription: outdoorDescription || '' }));
+        const msgs = buildLocalMapRefreshMessages(getCommonPromptVars({ locationName: locationName || store?.playerLocation || 'Địa điểm không rõ', locationInfo: currentLocalMap?.description || '', currentLocalMap: currentLocalMap || null, outdoorDescription: outdoorDescription || '' }));
         const data = await callLLMJson({ messages: msgs, validate: V.lm });
-        if (!data?.inside) return replyErr('REFRESH_LOCAL_MAP_RESULT', requestId, '局部地图刷新失败：无法解析 JSON 数据');
+        if (!data?.inside) return replyErr('REFRESH_LOCAL_MAP_RESULT', requestId, 'Làm mới bản đồ cục bộ thất bại: Không thể phân tích dữ liệu JSON');
         tickSimCountdown(store);
         reply('REFRESH_LOCAL_MAP_RESULT', requestId, { success: true, localMapData: data.inside });
-    } catch (e) { replyErr('REFRESH_LOCAL_MAP_RESULT', requestId, `局部地图刷新失败: ${e.message}`); }
+    } catch (e) { replyErr('REFRESH_LOCAL_MAP_RESULT', requestId, `Làm mới bản đồ cục bộ thất bại: ${e.message}`); }
 }
 
 async function handleGenLocalScene({ requestId, locationName, locationInfo }) {
     try {
         const store = getOutlineStore();
-        const msgs = buildLocalSceneGenMessages(getCommonPromptVars({ locationName: locationName || store?.playerLocation || '未知地点', locationInfo: locationInfo || '' }));
+        const msgs = buildLocalSceneGenMessages(getCommonPromptVars({ locationName: locationName || store?.playerLocation || 'Địa điểm không rõ', locationInfo: locationInfo || '' }));
         const data = await callLLMJson({ messages: msgs, validate: V.lscene });
-        if (!data || !V.lscene(data)) return replyErr('GENERATE_LOCAL_SCENE_RESULT', requestId, '局部剧情生成失败：无法解析 JSON 数据');
+        if (!data || !V.lscene(data)) return replyErr('GENERATE_LOCAL_SCENE_RESULT', requestId, 'Tạo cốt truyện cục bộ thất bại: Không thể phân tích dữ liệu JSON');
         tickSimCountdown(store);
         const ssf = data.side_story || null;
         const intro = (ssf?.Incident || '').trim();
         const ss = ssf ? { Facade: ssf.Facade || '', Undercurrent: ssf.Undercurrent || '' } : null;
         reply('GENERATE_LOCAL_SCENE_RESULT', requestId, { success: true, sceneSetup: { sideStory: ss, review: data.review || null }, introduce: intro, loc: locationName });
-    } catch (e) { replyErr('GENERATE_LOCAL_SCENE_RESULT', requestId, `局部剧情生成失败: ${e.message}`); }
+    } catch (e) { replyErr('GENERATE_LOCAL_SCENE_RESULT', requestId, `Tạo cốt truyện cục bộ thất bại: ${e.message}`); }
 }
 
 async function handleGenWorld({ requestId, playerRequests }) {
@@ -1154,60 +1154,60 @@ async function handleGenWorld({ requestId, playerRequests }) {
             const msgs = buildWorldGenStep2Messages(getCommonPromptVars({ playerRequests, mode: 'assist' }));
             let wd = await callLLMJson({ messages: msgs, validate: V.wga });
             wd = normalizeStep2Maps(wd);
-            if (!wd?.maps?.outdoor || !Array.isArray(wd.maps.outdoor.nodes)) return replyErr('GENERATE_WORLD_RESULT', requestId, '生成失败：返回数据缺少地图节点');
+            if (!wd?.maps?.outdoor || !Array.isArray(wd.maps.outdoor.nodes)) return replyErr('GENERATE_WORLD_RESULT', requestId, 'Tạo thất bại: Dữ liệu trả về thiếu nút bản đồ');
             if (store) { Object.assign(store, { stage: 0, deviationScore: 0, simulationTarget: randRange(3, 7) }); store.outlineData = { ...wd }; saveMetadataDebounced?.(); sendSimStateOnly(); }
             return reply('GENERATE_WORLD_RESULT', requestId, { success: true, worldData: wd });
         }
 
         // Step 1
-        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: '正在构思世界大纲 (Step 1/2)...' });
+        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: 'Đang phác thảo dàn ý thế giới (Step 1/2)...' });
         const s1m = buildWorldGenStep1Messages(getCommonPromptVars({ playerRequests }));
         const s1d = normalizeStep1Data(await callLLMJson({ messages: s1m, validate: V.wg1 }));
 
         // 简化验证 - 只要有基本数据就行
         if (!s1d?.meta) {
-            return replyErr('GENERATE_WORLD_RESULT', requestId, 'Step 1 失败：无法解析大纲数据，请重试');
+            return replyErr('GENERATE_WORLD_RESULT', requestId, 'Step 1 thất bại: Không thể phân tích dữ liệu dàn ý, vui lòng thử lại');
         }
         step1Cache = { step1Data: s1d, playerRequests: playerRequests || '' };
 
         // Step 2
-        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: 'Step 1 完成，1 秒后开始构建世界细节 (Step 2/2)...' });
+        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: 'Step 1 hoàn tất, bắt đầu xây dựng chi tiết thế giới sau 1 giây (Step 2/2)...' });
         await new Promise(r => setTimeout(r, 1000));
-        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: '正在构建世界细节 (Step 2/2)...' });
+        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: 'Đang xây dựng chi tiết thế giới (Step 2/2)...' });
 
         const s2m = buildWorldGenStep2Messages(getCommonPromptVars({ playerRequests, step1Data: s1d }));
         let s2d = await callLLMJson({ messages: s2m, validate: V.wg2 });
         s2d = normalizeStep2Maps(s2d);
         if (s2d?.world?.maps && !s2d?.maps) { s2d.maps = s2d.world.maps; delete s2d.world.maps; }
-        if (!s2d?.world || !s2d?.maps) return replyErr('GENERATE_WORLD_RESULT', requestId, 'Step 2 失败：无法生成有效的地图');
+        if (!s2d?.world || !s2d?.maps) return replyErr('GENERATE_WORLD_RESULT', requestId, 'Step 2 thất bại: Không thể tạo bản đồ hợp lệ');
 
         const final = { meta: s1d.meta, world: s2d.world, maps: s2d.maps, playerLocation: s2d.playerLocation };
         step1Cache = null;
         if (store) { Object.assign(store, { stage: 0, deviationScore: 0, simulationTarget: randRange(3, 7) }); store.outlineData = final; saveMetadataDebounced?.(); sendSimStateOnly(); }
         reply('GENERATE_WORLD_RESULT', requestId, { success: true, worldData: final });
-    } catch (e) { replyErr('GENERATE_WORLD_RESULT', requestId, `生成失败: ${e.message}`); }
+    } catch (e) { replyErr('GENERATE_WORLD_RESULT', requestId, `Tạo thất bại: ${e.message}`); }
 }
 
 async function handleRetryStep2({ requestId }) {
     try {
-        if (!step1Cache?.step1Data?.meta) return replyErr('GENERATE_WORLD_RESULT', requestId, 'Step 2 重试失败：缺少 Step 1 数据，请重新开始生成');
+        if (!step1Cache?.step1Data?.meta) return replyErr('GENERATE_WORLD_RESULT', requestId, 'Thử lại Step 2 thất bại: Thiếu dữ liệu Step 1, vui lòng tạo lại từ đầu');
         const store = getOutlineStore(), s1d = step1Cache.step1Data, pr = step1Cache.playerRequests || '';
 
-        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: '1 秒后重试构建世界细节 (Step 2/2)...' });
+        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: 'Thử lại xây dựng chi tiết thế giới sau 1 giây (Step 2/2)...' });
         await new Promise(r => setTimeout(r, 1000));
-        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: '正在重试构建世界细节 (Step 2/2)...' });
+        postFrame({ type: 'GENERATE_WORLD_STATUS', requestId, message: 'Đang thử lại xây dựng chi tiết thế giới (Step 2/2)...' });
 
         const s2m = buildWorldGenStep2Messages(getCommonPromptVars({ playerRequests: pr, step1Data: s1d }));
         let s2d = await callLLMJson({ messages: s2m, validate: V.wg2 });
         s2d = normalizeStep2Maps(s2d);
         if (s2d?.world?.maps && !s2d?.maps) { s2d.maps = s2d.world.maps; delete s2d.world.maps; }
-        if (!s2d?.world || !s2d?.maps) return replyErr('GENERATE_WORLD_RESULT', requestId, 'Step 2 失败：无法生成有效的地图');
+        if (!s2d?.world || !s2d?.maps) return replyErr('GENERATE_WORLD_RESULT', requestId, 'Step 2 thất bại: Không thể tạo bản đồ hợp lệ');
 
         const final = { meta: s1d.meta, world: s2d.world, maps: s2d.maps, playerLocation: s2d.playerLocation };
         step1Cache = null;
         if (store) { Object.assign(store, { stage: 0, deviationScore: 0, simulationTarget: randRange(3, 7) }); store.outlineData = final; saveMetadataDebounced?.(); sendSimStateOnly(); }
         reply('GENERATE_WORLD_RESULT', requestId, { success: true, worldData: final });
-    } catch (e) { replyErr('GENERATE_WORLD_RESULT', requestId, `Step 2 重试失败: ${e.message}`); }
+    } catch (e) { replyErr('GENERATE_WORLD_RESULT', requestId, `Thử lại Step 2 thất bại: ${e.message}`); }
 }
 
 async function handleSimWorld({ requestId, currentData, isAuto }) {
@@ -1216,11 +1216,11 @@ async function handleSimWorld({ requestId, currentData, isAuto }) {
         const mode = getGlobalSettings().mode || 'story';
         const msgs = buildWorldSimMessages(getCommonPromptVars({ currentWorldData: currentData || '{}' }));
         const data = await callLLMJson({ messages: msgs, validate: V.w });
-        if (!data || !V.w(data)) return replyErr('SIMULATE_WORLD_RESULT', requestId, mode === 'assist' ? '世界推演失败：无法解析 JSON 数据（需包含 world 或 maps 字段）' : '世界推演失败：无法解析 JSON 数据');
+        if (!data || !V.w(data)) return replyErr('SIMULATE_WORLD_RESULT', requestId, mode === 'assist' ? 'Diễn biến thế giới thất bại: Không thể phân tích JSON (cần chứa trường world hoặc maps)' : 'Diễn biến thế giới thất bại: Không thể phân tích JSON');
         const orig = safe(() => JSON.parse(currentData)) || {}, merged = mergeSimData(orig, data);
         if (store) { store.stage = (store.stage || 0) + 1; store.simulationTarget = randRange(3, 7); saveMetadataDebounced?.(); sendSimStateOnly(); }
         reply('SIMULATE_WORLD_RESULT', requestId, { success: true, simData: merged, isAuto: !!isAuto });
-    } catch (e) { replyErr('SIMULATE_WORLD_RESULT', requestId, `推演失败: ${e.message}`); }
+    } catch (e) { replyErr('SIMULATE_WORLD_RESULT', requestId, `Diễn biến thất bại: ${e.message}`); }
 }
 
 function handleSaveSettings(d) {
@@ -1448,7 +1448,7 @@ function addBtnToMsg(mesId) {
     if (!msg || msg.querySelector('.xiaobaix-story-outline-btn')) return;
     const btn = document.createElement('div');
     btn.className = 'mes_btn xiaobaix-story-outline-btn';
-    btn.title = '小白板';
+    btn.title = 'Bảng Trắng';
     btn.dataset.mesid = mesId;
     btn.innerHTML = '<i class="fa-regular fa-map"></i>';
     btn.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); if (!getSettings().storyOutline?.enabled) return; showOverlay(); loadAndSend(); });
