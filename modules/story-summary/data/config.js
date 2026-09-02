@@ -40,7 +40,7 @@ Incremental_Summary_Requirements:
         - Điểm nhấn: Có chi tiết thú vị nhưng không ảnh hưởng đến tuyến chính.
         - Không khí: Đoạn thuần túy tạo bầu không khí.
     - Causal_Chain: Gắn thẻ ID của sự kiện nguyên nhân trực tiếp (causedBy) cho mỗi sự kiện mới. Chỉ điền khi mối quan hệ nhân quả rõ ràng (dẫn đến trực tiếp / động cơ rõ ràng / tiếp nối hậu quả); việc điền [] khi không rõ ràng là hoàn toàn bình thường. Chỉ điền tối đa 0-2 ID, dùng định dạng evt-số, trỏ đến sự kiện đã tồn tại hoặc sự kiện mới được xuất ra lần này.
-  - Character_Dynamics: Nhận diện nhân vật mới, theo dõi xu hướng mối quan hệ (rạn nứt / chán ghét / ác cảm / xa lạ / hợp ý / thân mật / hòa quyện)
+  - Character_Dynamics: Nhận diện nhân vật mới, theo dõi xu hướng mối quan hệ (Rạn nứt / Chán ghét / Ác cảm / Xa lạ / Hợp ý / Thân mật / Hòa quyện)
   - Arc_Tracking: Cập nhật quỹ đạo phát triển của nhân vật và tiến độ trưởng thành (0.0-1.0)
   - Fact_Tracking: Duy trì sơ đồ tri thức bộ ba SPO. Theo dõi các dữ kiện cứng như sống chết, quyền sở hữu vật phẩm, vị trí, mối quan hệ, các đặc điểm cơ thể nhận dạng ổn định. Sử dụng mô hình ghi đè KV (với s+p làm khóa).
 </task_settings>
@@ -114,13 +114,6 @@ Summary Specialist:
 - Các thực thể có tên liên quan trực tiếp đến sự kiện (tên người, địa điểm, vật phẩm), đặc điểm nhận dạng và câu thoại gốc quan trọng dưới 15 chữ thuộc về lớp được giữ lại cuối cùng; Không nhét gượng ép các danh từ không liên quan.
 - Không viết những câu sáo rỗng như "Hai người xảy ra xung đột", "Mối quan hệ xấu đi", mà phải viết rõ ràng là ai, ở đâu, cầm gì, làm gì với ai, và kết quả ra sao.
 - Ưu tiên viết thành 1 câu; Nếu thông tin thực sự quá nhiều thì có thể viết 2 câu, nhưng đừng tách thành mào đầu chung chung + bổ sung chi tiết.
-- Không hợp lệ:
-  1. Hai người xảy ra xung đột ở quán rượu, mối quan hệ xấu đi.
-  2. Hai người có tương tác mập mờ và hẹn gặp lại.
-  3. Cô ấy tiết lộ một bí mật khiến đối phương bị đả kích.
-- Hợp lệ:
-  1. Tô Vãn đập tờ giấy nợ vào ngực Cố Hành giữa quán rượu Hạc Đen, mắng hắn đem nhà cũ của mẹ cô ra cá cược, Cố Hành định nắm cổ tay cô nhưng bị hất ra, đám đông chế nhạo, hai người hoàn toàn tuyệt giao. (#120-123)
-  2. Chu Nịnh đứng trước cửa phòng tắm nhà nghỉ chằm chằm vào vết cắn trên xương quai xanh của Lâm Vũ, gặng hỏi đêm qua ở cùng ai, Lâm Vũ vừa chỉnh lại chiếc áo sơ mi ướt sũng vừa cứng miệng phủ nhận, cuối cùng hứa tối mai sẽ lại đến bến tàu cũ gặp cô. (#88-91)
 
 [Thang đo xu hướng mối quan hệ]
 Rạn nứt ← Chán ghét ← Ác cảm ← Xa lạ → Hợp ý → Thân mật → Hòa quyện
@@ -254,7 +247,7 @@ Trước khi tạo, hãy quan sát NGƯỜI DÙNG và phân tích cẩn thận:
 - characterAliasUpdates là tùy chọn; bỏ qua key này nếu không có thân phận mới được tiết lộ.
 - Là JSON hợp lệ, tránh dùng ngoặc kép tiếng Anh bên trong chuỗi giá trị.
 - Dùng văn phong mộc mạc, chân thực, sát với đời thường để ghi lại dữ kiện, tránh so sánh hay hình tượng hóa. Nghiêm túc, chú trọng chi tiết, viết rõ: ai, lúc nào/ở đâu, làm gì với ai, xuất hiện đạo cụ gì, kết quả ra sao.
-- **ALL GENERATED TEXT INSIDE THE JSON MUST BE IN VIETNAMESE (TIẾNG VIỆT). DO NOT OUTPUT CHINESE.**
+- **ALL GENERATED TEXT INSIDE THE JSON MUST BE IN VIETNAMESE (TIẾNG VIỆT). DO NOT OUTPUT CHINESE EXCEPT FOR "对X的看法".**
 </meta_protocol>
 
 ## Placeholder Notes (Ghi chú về biến giữ chỗ - KHÔNG XÓA)
