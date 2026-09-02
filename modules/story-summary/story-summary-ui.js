@@ -1,4 +1,4 @@
-﻿// story-summary-ui.js
+// story-summary-ui.js
 // iframe 内 UI 逻辑
 
 (function () {
@@ -63,15 +63,15 @@
         }
     }
 
-    const DEFAULT_MEMORY_PROMPT_TEMPLATE = `以上是还留在眼前的对话
-以下是脑海里的记忆：
-• [定了的事] 这些是不会变的
-• [其他人的事] 别人的经历，当前角色可能不知晓
-• 其余部分是过往经历的回忆碎片
+    const DEFAULT_MEMORY_PROMPT_TEMPLATE = `Trên đây là đoạn hội thoại vẫn còn lưu lại trước mắt
+Dưới đây là những ký ức trong tâm trí:
+• [Những chuyện đã định] Đây là những điều sẽ không thay đổi
+• [Chuyện của người khác] Trải nghiệm của người khác, nhân vật hiện tại có thể không biết
+• Phần còn lại là những mảnh vỡ ký ức về các trải nghiệm trong quá khứ
 
-请内化这些记忆：
+Hãy nội tâm hóa những ký ức này:
 {$剧情记忆}
-这些记忆是真实的，请自然地记住它们。`;
+Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự nhiên.`;
 
     const EMPTY_BUILTIN_SUMMARY_PROMPTS = Object.freeze({
         summarySystemPrompt: '',
@@ -248,19 +248,23 @@
     }
 
     const SECTION_META = {
-        keywords: { title: '编辑关键词', hint: '每行一个关键词，格式：关键词|权重（核心/重要/一般）' },
-        events: { title: '编辑事件时间线', hint: '编辑时，每个事件要素都应完整' },
-        characters: { title: '编辑人物关系', hint: '编辑时，每个要素都应完整' },
-        arcs: { title: '编辑角色弧光', hint: '编辑时，每个要素都应完整' },
-        facts: { title: '编辑事实图谱', hint: '每行一条：主体|谓词|值|趋势(可选)。删除用：主体|谓词|（留空值）' }
+        keywords: { title: 'Chỉnh sửa Từ khóa', hint: 'Mỗi dòng một từ khóa, định dạng: Từ khóa|Trọng số (Cốt lõi/Quan trọng/Bình thường)' },
+        events: { title: 'Chỉnh sửa Dòng thời gian Sự kiện', hint: 'Khi chỉnh sửa, các yếu tố sự kiện phải được điền đầy đủ' },
+        characters: { title: 'Chỉnh sửa Mối quan hệ', hint: 'Khi chỉnh sửa, các yếu tố phải được điền đầy đủ' },
+        arcs: { title: 'Chỉnh sửa Quỹ đạo Nhân vật', hint: 'Khi chỉnh sửa, các yếu tố phải được điền đầy đủ' },
+        facts: { title: 'Chỉnh sửa Sơ đồ Dữ kiện', hint: 'Mỗi dòng một mục: Chủ thể|Vị ngữ|Giá trị|Xu hướng(Tùy chọn). Để xóa dùng: Chủ thể|Vị ngữ| (Để trống)' }
     };
 
     const TREND_COLORS = {
+        'Rạn nứt': '#444444', 'Chán ghét': '#8b0000', 'Ác cảm': '#cd5c5c',
+        'Xa lạ': '#888888', 'Hợp ý': '#4a9a7e', 'Thân mật': '#d87a7a', 'Hòa quyện': '#c71585',
         '破裂': '#444444', '厌恶': '#8b0000', '反感': '#cd5c5c',
         '陌生': '#888888', '投缘': '#4a9a7e', '亲密': '#d87a7a', '交融': '#c71585'
     };
 
     const TREND_CLASS = {
+        'Rạn nứt': 'trend-broken', 'Chán ghét': 'trend-hate', 'Ác cảm': 'trend-dislike',
+        'Xa lạ': 'trend-stranger', 'Hợp ý': 'trend-click', 'Thân mật': 'trend-close', 'Hòa quyện': 'trend-merge',
         '破裂': 'trend-broken', '厌恶': 'trend-hate', '反感': 'trend-dislike',
         '陌生': 'trend-stranger', '投缘': 'trend-click', '亲密': 'trend-close', '交融': 'trend-merge'
     };
@@ -377,7 +381,7 @@
             summaryModelFetchTimeoutId = null;
         }
         $('btn-connect').disabled = false;
-        $('btn-connect').textContent = '连接 / 拉取模型列表';
+        $('btn-connect').textContent = 'Kết nối / Lấy danh sách mô hình';
     }
 
     function resetSettingsSaveUi() {
@@ -388,7 +392,7 @@
         const btn = $('settings-save');
         if (btn) {
             btn.disabled = false;
-            btn.textContent = '保存';
+            btn.textContent = 'Lưu';
         }
     }
 
@@ -467,11 +471,11 @@
         if (generateButton) {
             generateButton.disabled = !controlsEnabled;
             generateButton.title = currentChatSummaryPending
-                ? '正在同步当前聊天状态'
+                ? 'Đang đồng bộ trạng thái chat hiện tại'
                 : !effectiveEnabled
-                    ? '请先启用当前聊天的剧情总结'
+                    ? 'Vui lòng bật tổng kết cốt truyện cho chat hiện tại trước'
                     : !consumable
-                        ? '总结历史无法安全回滚；请导出并修正后重新导入，或清空总结数据'
+                        ? 'Lịch sử tóm tắt không thể hoàn tác an toàn; vui lòng xuất ra, sửa lại rồi nhập vào, hoặc xóa sạch dữ liệu tóm tắt'
                         : '';
         }
 
@@ -510,10 +514,10 @@
         label.classList.toggle('is-disabled', !enabled);
 
         const title = !vectorEnabled
-            ? '需先启用向量功能'
+            ? 'Cần bật tính năng Vector trước'
             : !hideEnabled
-                ? '需先开启“隐藏已总结”'
-                : '开：按最新向量楼层作为隐藏计算锚点\n关：按最新的大总结楼层作为隐藏计算锚点\n提示：若您的第三方模型 API 支持 Context Caching（上下文缓存），关闭此项可提高缓存命中率；开启此项则影响命中，但语义和上下文更自然';
+                ? 'Cần bật "Ẩn tin nhắn đã tóm tắt" trước'
+                : 'Bật: Ẩn theo tiến độ mới nhất của Ký ức thông minh\nTắt: Ẩn theo tiến độ mới nhất của Tổng kết cốt truyện\nGhi chú: Nếu mô hình API của bạn hỗ trợ Context Caching (Bộ đệm ngữ cảnh), tắt tùy chọn này có thể tăng tỷ lệ trúng bộ đệm; bật tùy chọn này sẽ làm giảm tỷ lệ trúng nhưng ngữ cảnh và ý nghĩa sẽ tự nhiên hơn';
         label.title = title;
         if (info) {
             info.title = title;
@@ -623,15 +627,15 @@
                 if (timeoutMs > 0) {
                     timeoutId = setTimeout(() => {
                         pendingConfigSaveRequests.delete(requestId);
-                        setStatusText(statusEl, `${options.errorPrefix || '保存失败：'}请求超时（>${Math.round(timeoutMs / 1000)}s）`, 'error');
+                        setStatusText(statusEl, `${options.errorPrefix || 'Lưu thất bại: '}Yêu cầu quá hạn (>${Math.round(timeoutMs / 1000)}s)`, 'error');
                         resolve(false);
                     }, timeoutMs);
                 }
                 pendingConfigSaveRequests.set(requestId, {
                     resolve,
                     statusId,
-                    successMessage: options.successMessage || '配置已保存',
-                    errorPrefix: options.errorPrefix || '保存失败：',
+                    successMessage: options.successMessage || 'Đã lưu cấu hình',
+                    errorPrefix: options.errorPrefix || 'Lưu thất bại: ',
                     timeoutId,
                 });
                 postMsg('SAVE_PANEL_CONFIG', { config, requestId });
@@ -678,7 +682,7 @@
         $(`${prefix}-api-model-text`).value = profile.model || '';
 
         const cache = Array.isArray(profile.modelCache) ? profile.modelCache : [];
-        setSelectOptions($(`${prefix}-api-model-select`), cache, '请选择');
+        setSelectOptions($(`${prefix}-api-model-select`), cache, 'Vui lòng chọn');
         $(`${prefix}-api-model-select`).value = cache.includes(profile.model) ? profile.model : '';
         updateVectorProviderUI(prefix, provider);
     }
@@ -729,7 +733,7 @@
         }
         $(`${prefix}-api-key`).value = profile.key || '';
         $(`${prefix}-api-model-text`).value = profile.model || '';
-        setSelectOptions($(`${prefix}-api-model-select`), cache, '请选择');
+        setSelectOptions($(`${prefix}-api-model-select`), cache, 'Vui lòng chọn');
         $(`${prefix}-api-model-select`).value = cache.includes(profile.model) ? profile.model : '';
     }
 
@@ -737,8 +741,8 @@
         saveCurrentVectorApiProfile(prefix);
         await saveConfig({
             statusId: `${prefix}-api-connect-status`,
-            loadingMessage: '保存中...',
-            successMessage: '此组配置已保存',
+            loadingMessage: 'Đang lưu...',
+            successMessage: 'Đã lưu cấu hình nhóm này',
         });
     }
 
@@ -748,20 +752,20 @@
         const statusEl = $(`${prefix}-api-connect-status`);
         const btn = $(`${prefix}-btn-connect`);
         if (!pv.canFetch) {
-            statusEl.textContent = '当前渠道不支持自动拉取模型';
+            statusEl.textContent = 'Kênh hiện tại không hỗ trợ tự động lấy mô hình';
             return;
         }
 
         const baseUrl = $(`${prefix}-api-url`).value.trim();
         const apiKey = $(`${prefix}-api-key`).value.trim();
         if (!apiKey) {
-            statusEl.textContent = '请先填写 API KEY';
+            statusEl.textContent = 'Vui lòng điền API KEY trước';
             return;
         }
 
         btn.disabled = true;
-        btn.textContent = '连接中...';
-        statusEl.textContent = '连接中...';
+        btn.textContent = 'Đang kết nối...';
+        statusEl.textContent = 'Đang kết nối...';
 
         try {
             let models = null;
@@ -771,7 +775,7 @@
                 });
                 if (models?.length) break;
             }
-            if (!models?.length) throw new Error('未获取到模型列表');
+            if (!models?.length) throw new Error('Không lấy được danh sách mô hình');
 
             const allModels = [...new Set(models)];
             const filteredModels = filterVectorModelsByPurpose(prefix, allModels);
@@ -780,20 +784,20 @@
             apiCfg.providers = normalizeProviderProfiles(prefix, apiCfg);
             apiCfg.providers[provider] ||= createDefaultProviderProfile(provider, VECTOR_API_DEFAULT_MODELS[prefix]);
             apiCfg.providers[provider].modelCache = filteredModels;
-            setSelectOptions($(`${prefix}-api-model-select`), apiCfg.providers[provider].modelCache, '请选择');
+            setSelectOptions($(`${prefix}-api-model-select`), apiCfg.providers[provider].modelCache, 'Vui lòng chọn');
             $(`${prefix}-api-model-select-row`).classList.remove('hidden');
             if (!$(`${prefix}-api-model-text`).value.trim()) {
                 $(`${prefix}-api-model-text`).value = filteredModels[0];
                 $(`${prefix}-api-model-select`).value = filteredModels[0];
             }
             statusEl.textContent = filteredModels.length === allModels.length
-                ? `拉取成功：${filteredModels.length} 个模型`
-                : `拉取成功：共 ${allModels.length} 个，已筛出 ${filteredModels.length} 个适合当前用途的模型`;
+                ? `Lấy thành công: ${filteredModels.length} mô hình`
+                : `Lấy thành công: Tổng cộng ${allModels.length} cái, đã lọc ra ${filteredModels.length} mô hình phù hợp với mục đích hiện tại`;
         } catch (e) {
-            statusEl.textContent = '拉取失败：' + (e.message || '请检查 URL 和 KEY');
+            statusEl.textContent = 'Lấy thất bại: ' + (e.message || 'Vui lòng kiểm tra lại URL và KEY');
         } finally {
             btn.disabled = false;
-            btn.textContent = '连接 / 拉取模型列表';
+            btn.textContent = 'Kết nối / Lấy danh sách mô hình';
         }
     }
 
@@ -836,9 +840,9 @@
         setHtml(list, items.map((r, i) => `
             <div class="filter-rule-item" data-idx="${i}">
                 <div class="filter-rule-inputs">
-                    <input type="text" class="filter-rule-start" placeholder="起始（可空）" value="${h(r.start || '')}">
+                    <input type="text" class="filter-rule-start" placeholder="Bắt đầu (Có thể trống)" value="${h(r.start || '')}">
                     <span class="rule-arrow">⬇</span>
-                    <input type="text" class="filter-rule-end" placeholder="结束（可空）" value="${h(r.end || '')}">
+                    <input type="text" class="filter-rule-end" placeholder="Kết thúc (Có thể trống)" value="${h(r.end || '')}">
                 </div>
                 <button class="btn-del-rule">✕</button>
             </div>
@@ -880,9 +884,9 @@
         div.dataset.idx = idx;
         setHtml(div, `
             <div class="filter-rule-inputs">
-                <input type="text" class="filter-rule-start" placeholder="起始（可空）" value="">
+                <input type="text" class="filter-rule-start" placeholder="Bắt đầu (Có thể trống)" value="">
                 <span class="rule-arrow">⬇</span>
-                <input type="text" class="filter-rule-end" placeholder="结束（可空）" value="">
+                <input type="text" class="filter-rule-end" placeholder="Kết thúc (Có thể trống)" value="">
             </div>
             <button class="btn-del-rule">✕</button>
         `);
@@ -940,8 +944,8 @@
         if (extraWrap && extra) {
             if (empty > 0 || fail > 0) {
                 const parts = [];
-                if (empty > 0) parts.push(`空 ${empty}`);
-                if (fail > 0) parts.push(`失败 ${fail}`);
+                if (empty > 0) parts.push(`Trống ${empty}`);
+                if (fail > 0) parts.push(`Thất bại ${fail}`);
                 extra.textContent = parts.join(' · ');
                 extraWrap.style.display = '';
                 if (extraSep) extraSep.style.display = '';
@@ -989,7 +993,7 @@
         };
 
         $('btn-anchor-clear').onclick = async () => {
-            if (await showConfirm('清空锚点', '清空所有记忆锚点？（L0 向量也会一并清除）')) {
+            if (await showConfirm('Xóa điểm neo', 'Xóa sạch mọi điểm neo ký ức? (Vector L0 cũng sẽ bị xóa theo)')) {
                 postMsg('ANCHOR_CLEAR');
             }
         };
@@ -1013,7 +1017,7 @@
                 if (!input || !btn) return;
                 const show = input.type === 'password';
                 input.type = show ? 'text' : 'password';
-                btn.textContent = show ? '隐藏' : '显示';
+                btn.textContent = show ? 'Ẩn' : 'Hiện';
             };
 
             $(`${prefix}-api-provider`).onchange = e => {
@@ -1035,7 +1039,7 @@
             $(`${prefix}-btn-test`).onclick = () => {
                 const btn = $(`${prefix}-btn-test`);
                 if (btn) btn.disabled = true;
-                setStatusText($(`${prefix}-api-connect-status`), '测试中...', 'loading');
+                setStatusText($(`${prefix}-api-connect-status`), 'Đang test...', 'loading');
                 saveConfig();
                 const cfg = getVectorConfig();
                 postMsg('VECTOR_TEST_ONLINE', {
@@ -1054,7 +1058,7 @@
         };
 
         $('btn-clear-vectors').onclick = async () => {
-            if (await showConfirm('清空向量', '确定清空所有向量数据？')) {
+            if (await showConfirm('Xóa Vector', 'Chắc chắn xóa sạch mọi dữ liệu vector?')) {
                 postMsg('VECTOR_CLEAR');
             }
         };
@@ -1063,24 +1067,24 @@
 
         $('btn-export-vectors').onclick = () => {
             $('btn-export-vectors').disabled = true;
-            $('vector-io-status').textContent = '导出中...';
+            $('vector-io-status').textContent = 'Đang xuất...';
             postMsg('VECTOR_EXPORT');
         };
 
         $('btn-import-vectors').onclick = () => {
             $('btn-import-vectors').disabled = true;
-            $('vector-io-status').textContent = '导入中...';
+            $('vector-io-status').textContent = 'Đang nhập...';
             postMsg('VECTOR_IMPORT_PICK');
         };
         $('btn-backup-server').onclick = () => {
             $('btn-backup-server').disabled = true;
-            $('server-io-status').textContent = '备份中...';
+            $('server-io-status').textContent = 'Đang sao lưu...';
             postMsg('VECTOR_BACKUP_SERVER');
         };
 
         $('btn-restore-server').onclick = () => {
             $('btn-restore-server').disabled = true;
-            $('server-io-status').textContent = '恢复中...';
+            $('server-io-status').textContent = 'Đang khôi phục...';
             postMsg('VECTOR_RESTORE_SERVER');
         };
 
@@ -1104,25 +1108,25 @@
     function initSummaryIOUI() {
         $('btn-copy-summary').onclick = () => {
             $('btn-copy-summary').disabled = true;
-            $('summary-io-status').textContent = '复制中...';
+            $('summary-io-status').textContent = 'Đang sao chép...';
             postMsg('SUMMARY_COPY');
         };
 
         $('btn-import-summary').onclick = async () => {
             const text = await showConfirmInput(
-                '覆盖导入记忆包',
-                '导入会覆盖当前聊天已有的总结资料，并立即清空向量、锚点、总结边界。请把记忆包粘贴到下面。',
-                '继续导入',
-                '取消',
-                '在这里粘贴记忆包 JSON'
+                'Nhập ghi đè gói Ký ức',
+                'Nhập sẽ ghi đè tài liệu tóm tắt hiện có của chat, đồng thời xóa sạch vector, điểm neo và ranh giới tóm tắt. Vui lòng dán gói ký ức vào bên dưới.',
+                'Tiếp tục nhập',
+                'Hủy',
+                'Dán gói ký ức JSON vào đây'
             );
             if (text == null) return;
             if (!String(text).trim()) {
-                $('summary-io-status').textContent = '导入失败: 记忆包内容为空';
+                $('summary-io-status').textContent = 'Nhập thất bại: Gói ký ức trống';
                 return;
             }
             $('btn-import-summary').disabled = true;
-            $('summary-io-status').textContent = '导入中...';
+            $('summary-io-status').textContent = 'Đang nhập...';
             postMsg('SUMMARY_IMPORT_TEXT', { text });
         };
     }
@@ -1172,10 +1176,10 @@
         syncAutoSummaryControls();
 
         if (config.api.modelCache.length) {
-            setSelectOptions($('api-model-select'), config.api.modelCache, '请选择');
+            setSelectOptions($('api-model-select'), config.api.modelCache, 'Vui lòng chọn');
             $('api-model-select').value = config.api.modelCache.includes(config.api.model) ? config.api.model : '';
         } else {
-            setSelectOptions($('api-model-select'), [], '请选择');
+            setSelectOptions($('api-model-select'), [], 'Vui lòng chọn');
         }
 
         updateProviderUI(config.api.provider);
@@ -1184,12 +1188,12 @@
         settingsOpenedWithServerConfig = panelConfigLoadedFromServer;
         if (!settingsOpenedWithServerConfig) {
             postMsg('REQUEST_PANEL_CONFIG');
-            setStatusText($('api-connect-status'), '正在读取服务器配置，请稍候再保存', 'loading');
+            setStatusText($('api-connect-status'), 'Đang đọc cấu hình máy chủ, vui lòng đợi trước khi lưu', 'loading');
         }
         const saveBtn = $('settings-save');
         if (saveBtn) {
             saveBtn.disabled = !settingsOpenedWithServerConfig;
-            saveBtn.textContent = settingsOpenedWithServerConfig ? '保存' : '等待配置...';
+            saveBtn.textContent = settingsOpenedWithServerConfig ? 'Lưu' : 'Đang đợi cấu hình...';
         }
 
         // Initialize sub-options visibility
@@ -1259,7 +1263,7 @@
     async function saveSettings() {
         if (!settingsOpenedWithServerConfig) {
             postMsg('REQUEST_PANEL_CONFIG');
-            setStatusText($('api-connect-status'), '服务器配置尚未加载完成，请关闭设置后重开再保存', 'error');
+            setStatusText($('api-connect-status'), 'Cấu hình máy chủ chưa tải xong, vui lòng đóng cài đặt, mở lại rồi mới lưu', 'error');
             return false;
         }
         collectSettingsFormToConfig();
@@ -1268,13 +1272,13 @@
         resetSettingsSaveUi();
         if (btn) {
             btn.disabled = true;
-            btn.textContent = '保存中...';
+            btn.textContent = 'Đang lưu...';
         }
-        if (statusEl) setStatusText(statusEl, '保存中...', 'loading');
+        if (statusEl) setStatusText(statusEl, 'Đang lưu...', 'loading');
         const savePromise = saveConfig({
             statusId: 'api-connect-status',
-            loadingMessage: '保存中...',
-            successMessage: '配置已保存',
+            loadingMessage: 'Đang lưu...',
+            successMessage: 'Đã lưu cấu hình',
             timeoutMs: 5000,
         });
         const saved = await savePromise;
@@ -1295,7 +1299,7 @@
         const provider = $('api-provider').value;
 
         if (!PROVIDER_DEFAULTS[provider]?.canFetch) {
-            statusEl.textContent = '当前渠道不支持自动拉取模型';
+            statusEl.textContent = 'Kênh hiện tại không hỗ trợ tự động lấy mô hình';
             return;
         }
 
@@ -1303,15 +1307,15 @@
         const apiKey = $('api-key').value.trim();
 
         if (!apiKey) {
-            statusEl.textContent = '请先填写 API KEY';
+            statusEl.textContent = 'Vui lòng điền API KEY trước';
             return;
         }
 
         const requestId = nextSummaryModelFetchRequestId();
         pendingSummaryModelFetchRequestId = requestId;
         btn.disabled = true;
-        btn.textContent = '连接中...';
-        statusEl.textContent = '连接中...';
+        btn.textContent = 'Đang kết nối...';
+        statusEl.textContent = 'Đang kết nối...';
         if (summaryModelFetchTimeoutId) {
             clearTimeout(summaryModelFetchTimeoutId);
         }
@@ -1319,7 +1323,7 @@
             if (pendingSummaryModelFetchRequestId !== requestId) return;
             pendingSummaryModelFetchRequestId = '';
             resetSummaryModelFetchUi();
-            setStatusText(statusEl, '拉取失败：请求超时（>5s）', 'error');
+            setStatusText(statusEl, 'Lấy thất bại: Yêu cầu hết hạn (>5s)', 'error');
         }, 5000);
 
         postMsg('FETCH_SUMMARY_MODELS', {
@@ -1337,10 +1341,10 @@
 
     function renderKeywords(kw) {
         summaryData.keywords = kw || [];
-        const wc = { '核心': 'p', '重要': 's', high: 'p', medium: 's' };
+        const wc = { 'Cốt lõi': 'p', 'Quan trọng': 's', '核心': 'p', '重要': 's', high: 'p', medium: 's' };
         setHtml($('keywords-cloud'), kw.length
             ? kw.map(k => `<span class="tag ${wc[k.weight] || wc[k.level] || ''}">${h(k.text)}</span>`).join('')
-            : '<div class="empty">暂无关键词</div>');
+            : '<div class="empty">Chưa có từ khóa</div>');
     }
 
     function getTimelineScrollState() {
@@ -1400,13 +1404,13 @@
         summaryData.events = ev || [];
         const c = $('timeline-list');
         if (!ev?.length) {
-            setHtml(c, '<div class="empty">暂无事件记录</div>');
+            setHtml(c, '<div class="empty">Chưa có sự kiện nào</div>');
             timelineHasRenderedEvents = false;
             return;
         }
         setHtml(c, ev.map(e => {
             const participants = (e.participants || e.characters || []).map(h).join('、');
-            return `<div class="tl-item${e.weight === '核心' || e.weight === '主线' ? ' crit' : ''}">
+            return `<div class="tl-item${e.weight === 'Cốt lõi' || e.weight === 'Tuyến chính' || e.weight === '核心' || e.weight === '主线' ? ' crit' : ''}">
                 <div class="tl-dot"></div>
                 <div class="tl-head">
                     <div class="tl-title">${h(e.title || '')}</div>
@@ -1414,7 +1418,7 @@
                 </div>
                 <div class="tl-brief">${h(e.summary || e.brief || '')}</div>
                 <div class="tl-meta">
-                    <span>人物：${participants || '—'}</span>
+                    <span>Nhân vật: ${participants || '—'}</span>
                     <span class="imp">${h(e.type || '')}${e.type && e.weight ? ' · ' : ''}${h(e.weight || '')}</span>
                 </div>
             </div>`;
@@ -1600,7 +1604,7 @@
                 }
             });
         } else if (!id && txt) {
-            txt.textContent = '选择角色';
+            txt.textContent = 'Chọn nhân vật';
         }
         renderCharacterProfile();
         if (relationChart && id) {
@@ -1615,12 +1619,12 @@
         const txt = $('sel-char-text');
         if (!opts) return;
         if (!arcs?.length) {
-            setHtml(opts, '<div class="sel-opt" data-value="">暂无角色</div>');
-            if (txt) txt.textContent = '暂无角色';
+            setHtml(opts, '<div class="sel-opt" data-value="">Chưa có nhân vật</div>');
+            if (txt) txt.textContent = 'Chưa có nhân vật';
             currentCharacterId = null;
             return;
         }
-        setHtml(opts, arcs.map(a => `<div class="sel-opt" data-value="${h(a.id || a.name)}">${h(a.name || '角色')}</div>`).join(''));
+        setHtml(opts, arcs.map(a => `<div class="sel-opt" data-value="${h(a.id || a.name)}">${h(a.name || 'Nhân vật')}</div>`).join(''));
         opts.querySelectorAll('.sel-opt').forEach(o => {
             o.onclick = e => {
                 e.stopPropagation();
@@ -1643,17 +1647,17 @@
         const rels = summaryData.characters?.relationships || [];
 
         if (!currentCharacterId || !arcs.length) {
-            setHtml(c, '<div class="empty">暂无角色数据</div>');
+            setHtml(c, '<div class="empty">Chưa có dữ liệu nhân vật</div>');
             return;
         }
 
         const arc = arcs.find(a => (a.id || a.name) === currentCharacterId);
         if (!arc) {
-            setHtml(c, '<div class="empty">未找到角色数据</div>');
+            setHtml(c, '<div class="empty">Không tìm thấy dữ liệu nhân vật</div>');
             return;
         }
 
-        const name = arc.name || '角色';
+        const name = arc.name || 'Nhân vật';
         const moments = (arc.moments || arc.beats || []).map(m => typeof m === 'string' ? m : m.text);
         const outRels = rels.filter(r => r.from === name);
         const inRels = rels.filter(r => r.to === name);
@@ -1666,7 +1670,7 @@
                 </div>
                 <div class="prof-prog-wrap">
                     <div class="prof-prog-lbl">
-                        <span>弧光进度</span>
+                        <span>Tiến độ quỹ đạo</span>
                         <span>${Math.round((arc.progress || 0) * 100)}%</span>
                     </div>
                     <div class="prof-prog">
@@ -1675,31 +1679,31 @@
                 </div>
                 ${moments.length ? `
                     <div class="prof-moments">
-                        <div class="prof-moments-title">关键时刻</div>
+                        <div class="prof-moments-title">Khoảnh khắc quan trọng</div>
                         ${moments.map(m => `<div class="prof-moment">${h(m)}</div>`).join('')}
                     </div>
                 ` : ''}
             </div>
             <div class="prof-rels">
                 <div class="rels-group">
-                    <div class="rels-group-title">${h(name)}对别人的羁绊：</div>
+                    <div class="rels-group-title">${h(name)} kết nối với người khác:</div>
                     ${outRels.length ? outRels.map(r => `
                         <div class="rel-item">
-                            <span class="rel-target">对${h(r.to)}：</span>
+                            <span class="rel-target">Với ${h(r.to)}:</span>
                             <span class="rel-label">${h(r.label || '—')}</span>
                             ${r.trend ? `<span class="rel-trend ${TREND_CLASS[r.trend] || ''}">${h(r.trend)}</span>` : ''}
                         </div>
-                    `).join('') : '<div class="empty" style="padding:16px">暂无关系记录</div>'}
+                    `).join('') : '<div class="empty" style="padding:16px">Chưa có dữ liệu</div>'}
                 </div>
                 <div class="rels-group">
-                    <div class="rels-group-title">别人对${h(name)}的羁绊：</div>
+                    <div class="rels-group-title">Người khác kết nối với ${h(name)}:</div>
                     ${inRels.length ? inRels.map(r => `
                         <div class="rel-item">
-                            <span class="rel-target">${h(r.from)}：</span>
+                            <span class="rel-target">${h(r.from)}:</span>
                             <span class="rel-label">${h(r.label || '—')}</span>
                             ${r.trend ? `<span class="rel-trend ${TREND_CLASS[r.trend] || ''}">${h(r.trend)}</span>` : ''}
                         </div>
-                    `).join('') : '<div class="empty" style="padding:16px">暂无关系记录</div>'}
+                    `).join('') : '<div class="empty" style="padding:16px">Chưa có dữ liệu</div>'}
                 </div>
             </div>
         `);
@@ -1766,7 +1770,7 @@
      * 显示通用确认弹窗
      * @returns {Promise<boolean>}
      */
-    function showConfirm(title, message, okText = '执行', cancelText = '取消') {
+    function showConfirm(title, message, okText = 'Thực thi', cancelText = 'Hủy') {
         return new Promise(resolve => {
             const modal = $('confirm-modal');
             const titleEl = $('confirm-title');
@@ -1808,7 +1812,7 @@
         });
     }
 
-    function showConfirmInput(title, message, okText = '执行', cancelText = '取消', placeholder = '') {
+    function showConfirmInput(title, message, okText = 'Thực thi', cancelText = 'Hủy', placeholder = '') {
         return new Promise(resolve => {
             const modal = $('confirm-modal');
             const titleEl = $('confirm-title');
@@ -1872,28 +1876,28 @@
             const backdrop = $('confirm-backdrop');
             const busy = isBusyLike();
 
-            titleEl.textContent = '清理总结数据';
-            msgEl.textContent = '请选择要执行的清理操作。';
+            titleEl.textContent = 'Dọn dẹp dữ liệu tóm tắt';
+            msgEl.textContent = 'Vui lòng chọn thao tác dọn dẹp.';
             inputWrap.classList.add('hidden');
             inputEl.value = '';
             actionList.classList.remove('hidden');
             okBtn.classList.add('hidden');
-            cancelBtn.textContent = '退出';
+            cancelBtn.textContent = 'Thoát';
 
             if (busy) {
                 rollbackBtn.disabled = true;
                 clearBtn.disabled = true;
-                rollbackDesc.textContent = '当前有任务运行中，暂时不能执行。';
-                clearDesc.textContent = '当前有任务运行中，暂时不能执行。';
+                rollbackDesc.textContent = 'Đang có tiến trình chạy, tạm thời không thể thực thi.';
+                clearDesc.textContent = 'Đang có tiến trình chạy, tạm thời không thể thực thi.';
             } else {
                 rollbackBtn.disabled = !cleanActionState.canRollback;
                 clearBtn.disabled = false;
                 rollbackDesc.textContent = cleanActionState.canRollback
                     ? (cleanActionState.rollbackWillResetBoundary
-                        ? '撤销首次总结生成的内容；人工修改不会被覆盖，存在冲突时将拒绝回退。聊天记录不会删除。'
-                        : `撤销最近一次总结，已总结楼层将回退到 ${cleanActionState.rollbackTargetSummarizedUpTo} 楼。聊天记录不会删除。`)
-                    : '当前没有可回退的总结快照。';
-                clearDesc.textContent = '删除本聊天的全部总结数据，聊天记录不会删除。';
+                        ? 'Hoàn tác nội dung của lần tóm tắt đầu tiên; các sửa đổi thủ công sẽ không bị ghi đè, nếu có xung đột sẽ từ chối hoàn tác. Lịch sử chat sẽ không bị xóa.'
+                        : `Hoàn tác lần tóm tắt gần nhất, số tin đã tóm tắt sẽ lùi về ${cleanActionState.rollbackTargetSummarizedUpTo} tin. Lịch sử chat sẽ không bị xóa.`)
+                    : 'Hiện không có bản sao lưu tóm tắt nào để hoàn tác.';
+                clearDesc.textContent = 'Xóa toàn bộ dữ liệu tóm tắt của chat này, lịch sử chat sẽ không bị xóa.';
             }
 
             const close = (result) => {
@@ -1932,17 +1936,17 @@
             <div id="arc-list">
                 ${list.map((a, i) => `
                     <div class="struct-item arc-item" data-index="${i}">
-                        <div class="struct-row"><input type="text" class="arc-name" placeholder="角色名" value="${h(a.name || '')}"></div>
-                        <div class="struct-row"><textarea class="arc-trajectory" rows="2" placeholder="当前状态描述">${h(a.trajectory || '')}</textarea></div>
+                        <div class="struct-row"><input type="text" class="arc-name" placeholder="Tên nhân vật" value="${h(a.name || '')}"></div>
+                        <div class="struct-row"><textarea class="arc-trajectory" rows="2" placeholder="Mô tả trạng thái hiện tại">${h(a.trajectory || '')}</textarea></div>
                         <div class="struct-row">
-                            <label style="font-size:.75rem;color:var(--txt3)">进度：<input type="number" class="arc-progress" min="0" max="100" value="${Math.round((a.progress || 0) * 100)}" style="width:64px;display:inline-block"> %</label>
+                            <label style="font-size:.75rem;color:var(--txt3)">Tiến độ: <input type="number" class="arc-progress" min="0" max="100" value="${Math.round((a.progress || 0) * 100)}" style="width:64px;display:inline-block"> %</label>
                         </div>
-                        <div class="struct-row"><textarea class="arc-moments" rows="3" placeholder="关键时刻，一行一个">${h((a.moments || []).map(m => typeof m === 'string' ? m : m.text).join('\n'))}</textarea></div>
-                        <div class="struct-actions"><span>角色弧光 ${i + 1}</span></div>
+                        <div class="struct-row"><textarea class="arc-moments" rows="3" placeholder="Khoảnh khắc quan trọng, mỗi dòng 1 mục">${h((a.moments || []).map(m => typeof m === 'string' ? m : m.text).join('\n'))}</textarea></div>
+                        <div class="struct-actions"><span>Quỹ đạo nhân vật ${i + 1}</span></div>
                     </div>
                 `).join('')}
             </div>
-            <div style="margin-top:8px"><button type="button" class="btn btn-sm" id="arc-add">＋ 新增角色弧光</button></div>
+            <div style="margin-top:8px"><button type="button" class="btn btn-sm" id="arc-add">＋ Thêm quỹ đạo</button></div>
         `);
 
         es.querySelectorAll('.arc-item').forEach(addDeleteHandler);
@@ -1954,13 +1958,13 @@
             div.className = 'struct-item arc-item';
             div.dataset.index = idx;
             setHtml(div, `
-                <div class="struct-row"><input type="text" class="arc-name" placeholder="角色名"></div>
-                <div class="struct-row"><textarea class="arc-trajectory" rows="2" placeholder="当前状态描述"></textarea></div>
+                <div class="struct-row"><input type="text" class="arc-name" placeholder="Tên nhân vật"></div>
+                <div class="struct-row"><textarea class="arc-trajectory" rows="2" placeholder="Mô tả trạng thái hiện tại"></textarea></div>
                 <div class="struct-row">
-                    <label style="font-size:.75rem;color:var(--txt3)">进度：<input type="number" class="arc-progress" min="0" max="100" value="0" style="width:64px;display:inline-block"> %</label>
+                    <label style="font-size:.75rem;color:var(--txt3)">Tiến độ: <input type="number" class="arc-progress" min="0" max="100" value="0" style="width:64px;display:inline-block"> %</label>
                 </div>
-                <div class="struct-row"><textarea class="arc-moments" rows="3" placeholder="关键时刻，一行一个"></textarea></div>
-                <div class="struct-actions"><span>角色弧光 ${idx + 1}</span></div>
+                <div class="struct-row"><textarea class="arc-moments" rows="3" placeholder="Khoảnh khắc quan trọng, mỗi dòng 1 mục"></textarea></div>
+                <div class="struct-actions"><span>Quỹ đạo nhân vật ${idx + 1}</span></div>
             `);
             addDeleteHandler(div);
             listEl.appendChild(div);
@@ -1982,16 +1986,16 @@
             content.classList.remove('recall-empty');
         } else {
             setHtml(content, `<div class="recall-empty">
-            暂无召回日志<br><br>
-            当 AI 生成回复时，系统会自动进行记忆召回。<br><br>
-            召回日志将显示：<br>
-            • [L0] Query Understanding - 意图识别<br>
-            • [L1] Constraints - 硬约束注入<br>
-            • [L2] Narrative Retrieval - 事件召回<br>
-            • [L3] Evidence Assembly - 证据装配<br>
-            • [L4] Prompt Formatting - 格式化<br>
-            • [Budget] Token 预算使用情况<br>
-            • [Quality] 质量指标与潜在问题
+            Chưa có nhật ký gọi lại<br><br>
+            Khi AI tạo phản hồi, hệ thống sẽ tự động gọi lại ký ức.<br><br>
+            Nhật ký gọi lại sẽ hiển thị:<br>
+            • [L0] Query Understanding - Nhận diện ý định<br>
+            • [L1] Constraints - Bơm ràng buộc cứng<br>
+            • [L2] Narrative Retrieval - Gọi lại sự kiện<br>
+            • [L3] Evidence Assembly - Lắp ráp bằng chứng<br>
+            • [L4] Prompt Formatting - Định dạng<br>
+            • [Budget] Tình trạng sử dụng ngân sách Token<br>
+            • [Quality] Chỉ số chất lượng & Vấn đề tiềm ẩn
         </div>`);
         }
     }
@@ -2010,7 +2014,7 @@
         const b = document.createElement('button');
         b.type = 'button';
         b.className = 'btn btn-sm btn-del';
-        b.textContent = '删除';
+        b.textContent = 'Xóa';
         return b;
     }
 
@@ -2021,7 +2025,7 @@
     }
 
     function renderEventsEditor(events) {
-        const list = events?.length ? events : [{ id: 'evt-1', title: '', timeLabel: '', summary: '', participants: [], type: '日常', weight: '点睛' }];
+        const list = events?.length ? events : [{ id: 'evt-1', title: '', timeLabel: '', summary: '', participants: [], type: 'Đời thường', weight: 'Điểm nhấn' }];
         let maxId = 0;
         list.forEach(e => {
             const m = e.id?.match(/evt-(\d+)/);
@@ -2033,22 +2037,22 @@
             const id = ev.id || `evt-${++maxId}`;
             return `<div class="struct-item event-item" data-id="${h(id)}">
                 <div class="struct-row">
-                    <input type="text" class="event-title" placeholder="事件标题" value="${h(ev.title || '')}">
-                    <input type="text" class="event-time" placeholder="时间标签" value="${h(ev.timeLabel || '')}">
+                    <input type="text" class="event-title" placeholder="Tiêu đề sự kiện" value="${h(ev.title || '')}">
+                    <input type="text" class="event-time" placeholder="Nhãn thời gian" value="${h(ev.timeLabel || '')}">
                 </div>
                 <div class="struct-row">
-                    <textarea class="event-summary" rows="2" placeholder="一句话描述">${h(ev.summary || '')}</textarea>
+                    <textarea class="event-summary" rows="2" placeholder="Mô tả 1 câu">${h(ev.summary || '')}</textarea>
                 </div>
                 <div class="struct-row">
-                    <input type="text" class="event-participants" placeholder="人物（顿号分隔）" value="${h((ev.participants || []).join('、'))}">
+                    <input type="text" class="event-participants" placeholder="Nhân vật (cách nhau bằng dấu phẩy)" value="${h((ev.participants || []).join('、'))}">
                 </div>
                 <div class="struct-row">
-                    <select class="event-type">${['相遇', '冲突', '揭示', '抉择', '羁绊', '转变', '收束', '日常'].map(t => `<option ${ev.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
-                    <select class="event-weight">${['核心', '主线', '转折', '点睛', '氛围'].map(t => `<option ${ev.weight === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+                    <select class="event-type">${['Gặp gỡ', 'Xung đột', 'Tiết lộ', 'Lựa chọn', 'Gắn kết', 'Chuyển biến', 'Gỡ nút', 'Đời thường'].map(t => `<option ${ev.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+                    <select class="event-weight">${['Cốt lõi', 'Tuyến chính', 'Bước ngoặt', 'Điểm nhấn', 'Không khí'].map(t => `<option ${ev.weight === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
                 </div>
                 <div class="struct-actions"><span>ID：${h(id)}</span></div>
             </div>`;
-        }).join('') + '<div style="margin-top:8px"><button type="button" class="btn btn-sm" id="event-add">＋ 新增事件</button></div>');
+        }).join('') + '<div style="margin-top:8px"><button type="button" class="btn btn-sm" id="event-add">＋ Thêm sự kiện</button></div>');
 
         es.querySelectorAll('.event-item').forEach(addDeleteHandler);
 
@@ -2063,12 +2067,12 @@
             div.className = 'struct-item event-item';
             div.dataset.id = nid;
             setHtml(div, `
-                <div class="struct-row"><input type="text" class="event-title" placeholder="事件标题"><input type="text" class="event-time" placeholder="时间标签"></div>
-                <div class="struct-row"><textarea class="event-summary" rows="2" placeholder="一句话描述"></textarea></div>
-                <div class="struct-row"><input type="text" class="event-participants" placeholder="人物（顿号分隔）"></div>
+                <div class="struct-row"><input type="text" class="event-title" placeholder="Tiêu đề sự kiện"><input type="text" class="event-time" placeholder="Nhãn thời gian"></div>
+                <div class="struct-row"><textarea class="event-summary" rows="2" placeholder="Mô tả 1 câu"></textarea></div>
+                <div class="struct-row"><input type="text" class="event-participants" placeholder="Nhân vật (cách nhau bằng dấu phẩy)"></div>
                 <div class="struct-row">
-                    <select class="event-type">${['相遇', '冲突', '揭示', '抉择', '羁绊', '转变', '收束', '日常'].map(t => `<option>${t}</option>`).join('')}</select>
-                    <select class="event-weight">${['核心', '主线', '转折', '点睛', '氛围'].map(t => `<option>${t}</option>`).join('')}</select>
+                    <select class="event-type">${['Gặp gỡ', 'Xung đột', 'Tiết lộ', 'Lựa chọn', 'Gắn kết', 'Chuyển biến', 'Gỡ nút', 'Đời thường'].map(t => `<option>${t}</option>`).join('')}</select>
+                    <select class="event-weight">${['Cốt lõi', 'Tuyến chính', 'Bước ngoặt', 'Điểm nhấn', 'Không khí'].map(t => `<option>${t}</option>`).join('')}</select>
                 </div>
                 <div class="struct-actions"><span>ID：${h(nid)}</span></div>
             `);
@@ -2081,30 +2085,30 @@
         const d = data || { main: [], relationships: [] };
         const main = (d.main || []).map(getCharName);
         const rels = d.relationships || [];
-        const trendOpts = ['破裂', '厌恶', '反感', '陌生', '投缘', '亲密', '交融'];
+        const trendOpts = ['Rạn nứt', 'Chán ghét', 'Ác cảm', 'Xa lạ', 'Hợp ý', 'Thân mật', 'Hòa quyện'];
 
         const es = $('editor-struct');
         setHtml(es, `
             <div class="struct-item">
-                <div class="struct-row"><strong>角色列表</strong></div>
+                <div class="struct-row"><strong>Danh sách nhân vật</strong></div>
                 <div id="char-main-list">
-                    ${(main.length ? main : ['']).map(n => `<div class="struct-row char-main-item"><input type="text" class="char-main-name" placeholder="角色名" value="${h(n || '')}"></div>`).join('')}
+                    ${(main.length ? main : ['']).map(n => `<div class="struct-row char-main-item"><input type="text" class="char-main-name" placeholder="Tên nhân vật" value="${h(n || '')}"></div>`).join('')}
                 </div>
-                <div style="margin-top:8px"><button type="button" class="btn btn-sm" id="char-main-add">＋ 新增角色</button></div>
+                <div style="margin-top:8px"><button type="button" class="btn btn-sm" id="char-main-add">＋ Thêm nhân vật</button></div>
             </div>
             <div class="struct-item">
-                <div class="struct-row"><strong>人物关系</strong></div>
+                <div class="struct-row"><strong>Mối quan hệ nhân vật</strong></div>
                 <div id="char-rel-list">
-                    ${(rels.length ? rels : [{ from: '', to: '', label: '', trend: '陌生' }]).map(r => `
+                    ${(rels.length ? rels : [{ from: '', to: '', label: '', trend: 'Xa lạ' }]).map(r => `
                         <div class="struct-row char-rel-item">
-                            <input type="text" class="char-rel-from" placeholder="角色 A" value="${h(r.from || '')}">
-                            <input type="text" class="char-rel-to" placeholder="角色 B" value="${h(r.to || '')}">
-                            <input type="text" class="char-rel-label" placeholder="关系" value="${h(r.label || '')}">
+                            <input type="text" class="char-rel-from" placeholder="Nhân vật A" value="${h(r.from || '')}">
+                            <input type="text" class="char-rel-to" placeholder="Nhân vật B" value="${h(r.to || '')}">
+                            <input type="text" class="char-rel-label" placeholder="Quan hệ" value="${h(r.label || '')}">
                             <select class="char-rel-trend">${trendOpts.map(t => `<option ${r.trend === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
                         </div>
                     `).join('')}
                 </div>
-                <div style="margin-top:8px"><button type="button" class="btn btn-sm" id="char-rel-add">＋ 新增关系</button></div>
+                <div style="margin-top:8px"><button type="button" class="btn btn-sm" id="char-rel-add">＋ Thêm quan hệ</button></div>
             </div>
         `);
 
@@ -2113,7 +2117,7 @@
         $('char-main-add').onclick = () => {
             const div = document.createElement('div');
             div.className = 'struct-row char-main-item';
-            setHtml(div, '<input type="text" class="char-main-name" placeholder="角色名">');
+            setHtml(div, '<input type="text" class="char-main-name" placeholder="Tên nhân vật">');
             addDeleteHandler(div);
             $('char-main-list').appendChild(div);
         };
@@ -2122,9 +2126,9 @@
             const div = document.createElement('div');
             div.className = 'struct-row char-rel-item';
             setHtml(div, `
-                <input type="text" class="char-rel-from" placeholder="角色 A">
-                <input type="text" class="char-rel-to" placeholder="角色 B">
-                <input type="text" class="char-rel-label" placeholder="关系">
+                <input type="text" class="char-rel-from" placeholder="Nhân vật A">
+                <input type="text" class="char-rel-to" placeholder="Nhân vật B">
+                <input type="text" class="char-rel-label" placeholder="Quan hệ">
                 <select class="char-rel-trend">${trendOpts.map(t => `<option>${t}</option>`).join('')}</select>
             `);
             addDeleteHandler(div);
@@ -2146,7 +2150,7 @@
         ta.classList.remove('hidden');
 
         if (section === 'keywords') {
-            ta.value = summaryData.keywords.map(k => `${k.text}|${k.weight || '一般'}`).join('\n');
+            ta.value = summaryData.keywords.map(k => `${k.text}|${k.weight || 'Bình thường'}`).join('\n');
         } else if (section === 'facts') {
             ta.value = (summaryData.facts || [])
                 .filter(f => !f.retracted)
@@ -2185,7 +2189,7 @@
                 const oldMap = new Map((summaryData.keywords || []).map(k => [k.text, k]));
                 parsed = ta.value.trim().split('\n').filter(l => l.trim()).map(line => {
                     const [text, weight] = line.split('|').map(s => s.trim());
-                    return preserveAddedAt({ text: text || '', weight: weight || '一般' }, oldMap.get(text));
+                    return preserveAddedAt({ text: text || '', weight: weight || 'Bình thường' }, oldMap.get(text));
                 });
             } else if (section === 'events') {
                 const oldMap = new Map((summaryData.events || []).map(e => [e.id, e]));
@@ -2255,7 +2259,7 @@
                             since: old?.since ?? 0,
                             _addedAt: old?._addedAt ?? 0,
                         };
-                        if (/^对.+的/.test(p) && trend) {
+                        if (/(^đánh giá về.+|^对.+的)/.test(p) && trend) {
                             fact.trend = trend;
                         }
                         return fact;
@@ -2263,7 +2267,7 @@
                     .filter(Boolean);
             }
         } catch (e) {
-            $('editor-err').textContent = `格式错误: ${e.message}`;
+            $('editor-err').textContent = `Lỗi định dạng: ${e.message}`;
             $('editor-err').classList.add('visible');
             return;
         }
@@ -2303,7 +2307,7 @@
 
             case 'GENERATION_STATE':
                 localGenerating = !!d.isGenerating;
-                btn.textContent = localGenerating ? '停止' : '总结';
+                btn.textContent = localGenerating ? 'Dừng' : 'Tóm tắt';
                 break;
 
             case 'SUMMARY_BASE_DATA':
@@ -2383,7 +2387,7 @@
                         setStatusText(statusEl, pending.successMessage, 'success');
                         pending.resolve(true);
                     } else {
-                        setStatusText(statusEl, `${pending.errorPrefix}${d.error || '未知错误'}`, 'error');
+                        setStatusText(statusEl, `${pending.errorPrefix}${d.error || 'Lỗi không xác định'}`, 'error');
                         pending.resolve(false);
                     }
                 } else if (d.success && d.config) {
@@ -2400,7 +2404,7 @@
                 const models = Array.isArray(d.models) ? [...new Set(d.models.filter(Boolean))] : [];
                 config.api.modelCache = models;
                 modelListFetchedThisIframe = models.length > 0;
-                setSelectOptions($('api-model-select'), config.api.modelCache, '请选择');
+                setSelectOptions($('api-model-select'), config.api.modelCache, 'Vui lòng chọn');
                 $('api-model-select-row').classList.toggle('hidden', !models.length);
 
                 if (!config.api.model && models.length) {
@@ -2411,7 +2415,7 @@
                     $('api-model-select').value = config.api.model;
                 }
 
-                setStatusText($('api-connect-status'), `拉取成功：${models.length} 个模型`, 'success');
+                setStatusText($('api-connect-status'), `Lấy thành công: ${models.length} mô hình`, 'success');
                 break;
             }
 
@@ -2419,7 +2423,7 @@
                 if (!d.requestId || d.requestId !== pendingSummaryModelFetchRequestId) break;
                 pendingSummaryModelFetchRequestId = '';
                 resetSummaryModelFetchUi();
-                setStatusText($('api-connect-status'), '拉取失败：' + (d.message || '请检查 URL 和 KEY'), 'error');
+                setStatusText($('api-connect-status'), 'Lấy thất bại: ' + (d.message || 'Vui lòng kiểm tra lại URL và KEY'), 'error');
                 break;
 
             case 'VECTOR_CONFIG':
@@ -2473,18 +2477,18 @@
             case 'VECTOR_EXPORT_RESULT':
                 $('btn-export-vectors').disabled = false;
                 if (d.success) {
-                    $('vector-io-status').textContent = `导出成功: ${d.filename} (${(d.size / 1024 / 1024).toFixed(2)}MB)`;
+                    $('vector-io-status').textContent = `Xuất thành công: ${d.filename} (${(d.size / 1024 / 1024).toFixed(2)}MB)`;
                 } else {
-                    $('vector-io-status').textContent = '导出失败: ' + (d.error || '未知错误');
+                    $('vector-io-status').textContent = 'Xuất thất bại: ' + (d.error || 'Lỗi không xác định');
                 }
                 break;
 
             case 'SUMMARY_COPY_RESULT':
                 $('btn-copy-summary').disabled = false;
                 if (d.success) {
-                    $('summary-io-status').textContent = `复制成功: ${d.events || 0} 条事件, ${d.facts || 0} 条世界状态`;
+                    $('summary-io-status').textContent = `Sao chép thành công: ${d.events || 0} sự kiện, ${d.facts || 0} trạng thái thế giới`;
                 } else {
-                    $('summary-io-status').textContent = '复制失败: ' + (d.error || '未知错误');
+                    $('summary-io-status').textContent = 'Sao chép thất bại: ' + (d.error || 'Lỗi không xác định');
                 }
                 break;
 
@@ -2492,18 +2496,18 @@
                 $('btn-import-summary').disabled = false;
                 if (d.success) {
                     const c = d.counts || {};
-                    $('summary-io-status').textContent = `导入成功: ${c.events || 0} 条事件, ${c.facts || 0} 条世界状态，已覆盖当前总结资料并清空向量/锚点，请点击“完整重建”。`;
+                    $('summary-io-status').textContent = `Nhập thành công: ${c.events || 0} sự kiện, ${c.facts || 0} trạng thái thế giới, đã ghi đè dữ liệu tóm tắt và xóa vector/điểm neo, vui lòng bấm "Tái tạo toàn bộ".`;
                     postMsg('REQUEST_VECTOR_STATS');
                     postMsg('REQUEST_ANCHOR_STATS');
                 } else {
-                    $('summary-io-status').textContent = '导入失败: ' + (d.error || '未知错误');
+                    $('summary-io-status').textContent = 'Nhập thất bại: ' + (d.error || 'Lỗi không xác định');
                 }
                 break;
 
             case 'VECTOR_IMPORT_RESULT':
                 $('btn-import-vectors').disabled = false;
                 if (d.success) {
-                    let msg = `导入成功: ${d.chunkCount} 片段, ${d.eventCount} 事件`;
+                    let msg = `Nhập thành công: ${d.chunkCount} đoạn (chunk), ${d.eventCount} sự kiện`;
                     if (d.warnings?.length) {
                         msg += '\n⚠️ ' + d.warnings.join('\n⚠️ ');
                     }
@@ -2511,29 +2515,29 @@
                     // 刷新统计
                     postMsg('REQUEST_VECTOR_STATS');
                 } else {
-                    $('vector-io-status').textContent = '导入失败: ' + (d.error || '未知错误');
+                    $('vector-io-status').textContent = 'Nhập thất bại: ' + (d.error || 'Lỗi không xác định');
                 }
                 break;
             case 'VECTOR_BACKUP_RESULT':
                 $('btn-backup-server').disabled = false;
                 if (d.success) {
-                    $('server-io-status').textContent = `☁️ 备份成功: ${(d.size / 1024 / 1024).toFixed(2)}MB (${d.chunkCount} 片段, ${d.eventCount} 事件)`;
+                    $('server-io-status').textContent = `☁️ Sao lưu thành công: ${(d.size / 1024 / 1024).toFixed(2)}MB (${d.chunkCount} đoạn (chunk), ${d.eventCount} sự kiện)`;
                 } else {
-                    $('server-io-status').textContent = '备份失败: ' + (d.error || '未知错误');
+                    $('server-io-status').textContent = 'Sao lưu thất bại: ' + (d.error || 'Lỗi không xác định');
                 }
                 break;
 
             case 'VECTOR_RESTORE_RESULT':
                 $('btn-restore-server').disabled = false;
                 if (d.success) {
-                    let msg = `☁️ 恢复成功: ${d.chunkCount} 片段, ${d.eventCount} 事件`;
+                    let msg = `☁️ Khôi phục thành công: ${d.chunkCount} đoạn (chunk), ${d.eventCount} sự kiện`;
                     if (d.warnings?.length) {
                         msg += '\n⚠️ ' + d.warnings.join('\n⚠️ ');
                     }
                     $('server-io-status').textContent = msg;
                     postMsg('REQUEST_VECTOR_STATS');
                 } else {
-                    $('server-io-status').textContent = '恢复失败: ' + (d.error || '未知错误');
+                    $('server-io-status').textContent = 'Khôi phục thất bại: ' + (d.error || 'Lỗi không xác định');
                 }
                 break;
 
@@ -2633,13 +2637,13 @@
             if (action === 'rollback') {
                 const currentUpTo = cleanActionState.summarizedUpTo || 0;
                 const rollbackMessage = cleanActionState.rollbackWillResetBoundary
-                    ? '确定回退首次总结吗？首次总结生成的内容会被撤销；人工修改不会被覆盖，存在冲突时将拒绝回退。聊天记录不会删除。'
-                    : `确定回退上一次总结吗？将把已总结楼层从 ${currentUpTo} 回退到 ${cleanActionState.rollbackTargetSummarizedUpTo}。聊天记录不会删除。`;
-                if (await showConfirm('回退一次', rollbackMessage, '回退', '取消')) {
+                    ? 'Bạn có chắc muốn hoàn tác lần tóm tắt đầu tiên? Nội dung tạo ra sẽ bị hủy bỏ; sửa đổi thủ công không bị ghi đè, từ chối hoàn tác nếu có xung đột. Lịch sử chat không bị xóa.'
+                    : `Bạn có chắc muốn hoàn tác lần tóm tắt trước? Sẽ lùi số tin đã tóm tắt từ ${currentUpTo} về ${cleanActionState.rollbackTargetSummarizedUpTo}. Lịch sử chat sẽ không bị xóa.`;
+                if (await showConfirm('Hoàn tác 1 lần', rollbackMessage, 'Hoàn tác', 'Hủy')) {
                     postMsg('REQUEST_ROLLBACK_ONCE');
                 }
             } else if (action === 'clear') {
-                if (await showConfirm('清空全部', '确定要清空本聊天的所有总结、关键词及人物关系数据吗？聊天记录不会删除。此操作不可撤销。', '清空', '取消')) {
+                if (await showConfirm('Xóa tất cả', 'Bạn có chắc chắn muốn xóa sạch toàn bộ tóm tắt, từ khóa và dữ liệu quan hệ nhân vật của chat này không? Lịch sử chat sẽ không bị xóa. Thao tác này không thể hoàn tác.', 'Xóa sạch', 'Hủy')) {
                     postMsg('REQUEST_CLEAR');
                 }
             }
@@ -2648,11 +2652,11 @@
             const btn = $('btn-generate');
             if (!localGenerating) {
                 localGenerating = true;
-                btn.textContent = '停止';
+                btn.textContent = 'Dừng';
                 postMsg('REQUEST_GENERATE', { config: { api: config.api, gen: config.gen, trigger: config.trigger } });
             } else {
                 localGenerating = false;
-                btn.textContent = '总结';
+                btn.textContent = 'Tóm tắt';
                 postMsg('REQUEST_CANCEL');
             }
         };
@@ -2818,11 +2822,11 @@
         const container = $('facts-list');
         if (!container) return;
 
-        const isRelation = f => /^对.+的/.test(f.p);
+        const isRelation = f => /(^đánh giá về.+|^对.+的)/.test(f.p);
         const stateFacts = (facts || []).filter(f => !f.retracted && !isRelation(f));
 
         if (!stateFacts.length) {
-            setHtml(container, '<div class="empty">暂无状态记录</div>');
+            setHtml(container, '<div class="empty">Chưa có bản ghi trạng thái</div>');
             return;
         }
 
