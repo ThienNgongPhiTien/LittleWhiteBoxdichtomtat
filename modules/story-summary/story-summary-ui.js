@@ -86,6 +86,25 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
     });
 
     // ═══════════════════════════════════════════════════════════════════════════
+    // DICTIONARY FOR MAPPING OLD CHINESE DATA TO VIETNAMESE
+    // ═══════════════════════════════════════════════════════════════════════════
+    const TREND_MAP = {
+        '破裂': 'Rạn nứt', '厌恶': 'Chán ghét', '反感': 'Ác cảm',
+        '陌生': 'Xa lạ', '投缘': 'Hợp ý', '亲密': 'Thân mật', '交融': 'Hòa quyện'
+    };
+    
+    const TYPE_MAP = { 
+        '相遇': 'Gặp gỡ', '冲突': 'Xung đột', '揭示': 'Tiết lộ', 
+        '抉择': 'Lựa chọn', '羁绊': 'Gắn kết', '转变': 'Chuyển biến', 
+        '收束': 'Gỡ nút', '日常': 'Đời thường' 
+    };
+    
+    const WEIGHT_MAP = { 
+        '核心': 'Cốt lõi', '主线': 'Tuyến chính', 
+        '转折': 'Bước ngoặt', '点睛': 'Điểm nhấn', '氛围': 'Không khí' 
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
     // DOM Helpers
     // ═══════════════════════════════════════════════════════════════════════════
 
@@ -249,10 +268,10 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
 
     const SECTION_META = {
         keywords: { title: 'Chỉnh sửa Từ khóa', hint: 'Mỗi dòng một từ khóa, định dạng: Từ khóa|Trọng số (Cốt lõi/Quan trọng/Bình thường)' },
-        events: { title: 'Chỉnh sửa Dòng thời gian Sự kiện', hint: 'Khi chỉnh sửa, các yếu tố sự kiện phải được điền đầy đủ' },
+        events: { title: 'Chỉnh sửa Sự kiện', hint: 'Khi chỉnh sửa, các yếu tố phải được điền đầy đủ' },
         characters: { title: 'Chỉnh sửa Mối quan hệ', hint: 'Khi chỉnh sửa, các yếu tố phải được điền đầy đủ' },
         arcs: { title: 'Chỉnh sửa Quỹ đạo Nhân vật', hint: 'Khi chỉnh sửa, các yếu tố phải được điền đầy đủ' },
-        facts: { title: 'Chỉnh sửa Sơ đồ Dữ kiện', hint: 'Mỗi dòng một mục: Chủ thể|Vị ngữ|Giá trị|Xu hướng(Tùy chọn). Để xóa dùng: Chủ thể|Vị ngữ| (Để trống)' }
+        facts: { title: 'Chỉnh sửa Dữ kiện thế giới', hint: 'Mỗi dòng một mục: Chủ thể|Vị ngữ|Giá trị|Xu hướng(Tùy chọn). Để xóa dùng: Chủ thể|Vị ngữ| (Để trống)' }
     };
 
     const TREND_COLORS = {
@@ -471,11 +490,11 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         if (generateButton) {
             generateButton.disabled = !controlsEnabled;
             generateButton.title = currentChatSummaryPending
-                ? 'Đang đồng bộ trạng thái chat hiện tại'
+                ? 'Đang đồng bộ trạng thái chat'
                 : !effectiveEnabled
-                    ? 'Vui lòng bật tổng kết cốt truyện cho chat hiện tại trước'
+                    ? 'Vui lòng bật tính năng tóm tắt cho chat hiện tại trước'
                     : !consumable
-                        ? 'Lịch sử tóm tắt không thể hoàn tác an toàn; vui lòng xuất ra, sửa lại rồi nhập vào, hoặc xóa sạch dữ liệu tóm tắt'
+                        ? 'Không thể hoàn tác an toàn; vui lòng dọn dẹp hoặc nhập đè lại'
                         : '';
         }
 
@@ -512,21 +531,6 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         input.disabled = !enabled;
         container.classList.toggle('is-disabled', !enabled);
         label.classList.toggle('is-disabled', !enabled);
-
-        const title = !vectorEnabled
-            ? 'Cần bật tính năng Vector trước'
-            : !hideEnabled
-                ? 'Cần bật "Ẩn tin nhắn đã tóm tắt" trước'
-                : 'Bật: Ẩn theo tiến độ mới nhất của Ký ức thông minh\nTắt: Ẩn theo tiến độ mới nhất của Tổng kết cốt truyện\nGhi chú: Nếu mô hình API của bạn hỗ trợ Context Caching (Bộ đệm ngữ cảnh), tắt tùy chọn này có thể tăng tỷ lệ trúng bộ đệm; bật tùy chọn này sẽ làm giảm tỷ lệ trúng nhưng ngữ cảnh và ý nghĩa sẽ tự nhiên hơn';
-        label.title = title;
-        if (info) {
-            info.title = title;
-            info.onclick = e => {
-                e.preventDefault();
-                e.stopPropagation();
-                alert(title);
-            };
-        }
     }
 
     function loadConfig() {
@@ -627,7 +631,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                 if (timeoutMs > 0) {
                     timeoutId = setTimeout(() => {
                         pendingConfigSaveRequests.delete(requestId);
-                        setStatusText(statusEl, `${options.errorPrefix || 'Lưu thất bại: '}Yêu cầu quá hạn (>${Math.round(timeoutMs / 1000)}s)`, 'error');
+                        setStatusText(statusEl, `${options.errorPrefix || 'Lỗi lưu:'} Hết thời gian chờ (>${Math.round(timeoutMs / 1000)}s)`, 'error');
                         resolve(false);
                     }, timeoutMs);
                 }
@@ -635,7 +639,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                     resolve,
                     statusId,
                     successMessage: options.successMessage || 'Đã lưu cấu hình',
-                    errorPrefix: options.errorPrefix || 'Lưu thất bại: ',
+                    errorPrefix: options.errorPrefix || 'Lỗi lưu:',
                     timeoutId,
                 });
                 postMsg('SAVE_PANEL_CONFIG', { config, requestId });
@@ -742,7 +746,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         await saveConfig({
             statusId: `${prefix}-api-connect-status`,
             loadingMessage: 'Đang lưu...',
-            successMessage: 'Đã lưu cấu hình nhóm này',
+            successMessage: 'Đã lưu cấu hình',
         });
     }
 
@@ -752,14 +756,14 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         const statusEl = $(`${prefix}-api-connect-status`);
         const btn = $(`${prefix}-btn-connect`);
         if (!pv.canFetch) {
-            statusEl.textContent = 'Kênh hiện tại không hỗ trợ tự động lấy mô hình';
+            statusEl.textContent = 'Kênh hiện tại không hỗ trợ tự động kéo mô hình';
             return;
         }
 
         const baseUrl = $(`${prefix}-api-url`).value.trim();
         const apiKey = $(`${prefix}-api-key`).value.trim();
         if (!apiKey) {
-            statusEl.textContent = 'Vui lòng điền API KEY trước';
+            statusEl.textContent = 'Vui lòng điền API KEY';
             return;
         }
 
@@ -791,13 +795,13 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                 $(`${prefix}-api-model-select`).value = filteredModels[0];
             }
             statusEl.textContent = filteredModels.length === allModels.length
-                ? `Lấy thành công: ${filteredModels.length} mô hình`
-                : `Lấy thành công: Tổng cộng ${allModels.length} cái, đã lọc ra ${filteredModels.length} mô hình phù hợp với mục đích hiện tại`;
+                ? `Kéo thành công: ${filteredModels.length} mô hình`
+                : `Kéo thành công: Tổng ${allModels.length} cái, đã lọc ${filteredModels.length} mô hình phù hợp`;
         } catch (e) {
-            statusEl.textContent = 'Lấy thất bại: ' + (e.message || 'Vui lòng kiểm tra lại URL và KEY');
+            statusEl.textContent = 'Lỗi kết nối: ' + (e.message || 'Kiểm tra lại URL và KEY');
         } finally {
             btn.disabled = false;
-            btn.textContent = 'Kết nối / Lấy danh sách mô hình';
+            btn.textContent = 'Kết nối / Kéo mô hình';
         }
     }
 
@@ -945,7 +949,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             if (empty > 0 || fail > 0) {
                 const parts = [];
                 if (empty > 0) parts.push(`Trống ${empty}`);
-                if (fail > 0) parts.push(`Thất bại ${fail}`);
+                if (fail > 0) parts.push(`Lỗi ${fail}`);
                 extra.textContent = parts.join(' · ');
                 extraWrap.style.display = '';
                 if (extraSep) extraSep.style.display = '';
@@ -993,7 +997,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         };
 
         $('btn-anchor-clear').onclick = async () => {
-            if (await showConfirm('Xóa điểm neo', 'Xóa sạch mọi điểm neo ký ức? (Vector L0 cũng sẽ bị xóa theo)')) {
+            if (await showConfirm('Xóa điểm neo', 'Xóa sạch mọi điểm neo ký ức? (Vector L0 cũng bị xóa)')) {
                 postMsg('ANCHOR_CLEAR');
             }
         };
@@ -1058,7 +1062,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         };
 
         $('btn-clear-vectors').onclick = async () => {
-            if (await showConfirm('Xóa Vector', 'Chắc chắn xóa sạch mọi dữ liệu vector?')) {
+            if (await showConfirm('Xóa Vector', 'Chắc chắn xóa sạch toàn bộ Vector?')) {
                 postMsg('VECTOR_CLEAR');
             }
         };
@@ -1108,21 +1112,21 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
     function initSummaryIOUI() {
         $('btn-copy-summary').onclick = () => {
             $('btn-copy-summary').disabled = true;
-            $('summary-io-status').textContent = 'Đang sao chép...';
+            $('summary-io-status').textContent = 'Đang copy...';
             postMsg('SUMMARY_COPY');
         };
 
         $('btn-import-summary').onclick = async () => {
             const text = await showConfirmInput(
                 'Nhập ghi đè gói Ký ức',
-                'Nhập sẽ ghi đè tài liệu tóm tắt hiện có của chat, đồng thời xóa sạch vector, điểm neo và ranh giới tóm tắt. Vui lòng dán gói ký ức vào bên dưới.',
-                'Tiếp tục nhập',
+                'Nhập sẽ ghi đè tài liệu tóm tắt hiện có của chat, đồng thời xóa sạch vector, điểm neo. Vui lòng dán JSON vào bên dưới.',
+                'Tiếp tục',
                 'Hủy',
                 'Dán gói ký ức JSON vào đây'
             );
             if (text == null) return;
             if (!String(text).trim()) {
-                $('summary-io-status').textContent = 'Nhập thất bại: Gói ký ức trống';
+                $('summary-io-status').textContent = 'Nhập lỗi: Gói ký ức rỗng';
                 return;
             }
             $('btn-import-summary').disabled = true;
@@ -1188,12 +1192,12 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         settingsOpenedWithServerConfig = panelConfigLoadedFromServer;
         if (!settingsOpenedWithServerConfig) {
             postMsg('REQUEST_PANEL_CONFIG');
-            setStatusText($('api-connect-status'), 'Đang đọc cấu hình máy chủ, vui lòng đợi trước khi lưu', 'loading');
+            setStatusText($('api-connect-status'), 'Đang đọc cấu hình, vui lòng đợi', 'loading');
         }
         const saveBtn = $('settings-save');
         if (saveBtn) {
             saveBtn.disabled = !settingsOpenedWithServerConfig;
-            saveBtn.textContent = settingsOpenedWithServerConfig ? 'Lưu' : 'Đang đợi cấu hình...';
+            saveBtn.textContent = settingsOpenedWithServerConfig ? 'Lưu' : 'Đang đợi...';
         }
 
         // Initialize sub-options visibility
@@ -1263,7 +1267,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
     async function saveSettings() {
         if (!settingsOpenedWithServerConfig) {
             postMsg('REQUEST_PANEL_CONFIG');
-            setStatusText($('api-connect-status'), 'Cấu hình máy chủ chưa tải xong, vui lòng đóng cài đặt, mở lại rồi mới lưu', 'error');
+            setStatusText($('api-connect-status'), 'Cấu hình chưa tải xong, vui lòng đợi', 'error');
             return false;
         }
         collectSettingsFormToConfig();
@@ -1299,7 +1303,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         const provider = $('api-provider').value;
 
         if (!PROVIDER_DEFAULTS[provider]?.canFetch) {
-            statusEl.textContent = 'Kênh hiện tại không hỗ trợ tự động lấy mô hình';
+            statusEl.textContent = 'Kênh hiện tại không hỗ trợ tự động kéo mô hình';
             return;
         }
 
@@ -1307,7 +1311,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         const apiKey = $('api-key').value.trim();
 
         if (!apiKey) {
-            statusEl.textContent = 'Vui lòng điền API KEY trước';
+            statusEl.textContent = 'Vui lòng điền API KEY';
             return;
         }
 
@@ -1323,7 +1327,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             if (pendingSummaryModelFetchRequestId !== requestId) return;
             pendingSummaryModelFetchRequestId = '';
             resetSummaryModelFetchUi();
-            setStatusText(statusEl, 'Lấy thất bại: Yêu cầu hết hạn (>5s)', 'error');
+            setStatusText(statusEl, 'Lỗi kết nối: Hết thời gian chờ (>5s)', 'error');
         }, 5000);
 
         postMsg('FETCH_SUMMARY_MODELS', {
@@ -1341,7 +1345,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
 
     function renderKeywords(kw) {
         summaryData.keywords = kw || [];
-        const wc = { 'Cốt lõi': 'p', 'Quan trọng': 's', '核心': 'p', '重要': 's', high: 'p', medium: 's' };
+        const wc = { '核心': 'p', '重要': 's', 'Cốt lõi': 'p', 'Quan trọng': 's', high: 'p', medium: 's' };
         setHtml($('keywords-cloud'), kw.length
             ? kw.map(k => `<span class="tag ${wc[k.weight] || wc[k.level] || ''}">${h(k.text)}</span>`).join('')
             : '<div class="empty">Chưa có từ khóa</div>');
@@ -1410,7 +1414,9 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         }
         setHtml(c, ev.map(e => {
             const participants = (e.participants || e.characters || []).map(h).join('、');
-            return `<div class="tl-item${e.weight === 'Cốt lõi' || e.weight === 'Tuyến chính' || e.weight === '核心' || e.weight === '主线' ? ' crit' : ''}">
+            const eW = WEIGHT_MAP[e.weight] || e.weight || '';
+            const eT = TYPE_MAP[e.type] || e.type || '';
+            return `<div class="tl-item${e.weight === '核心' || e.weight === '主线' || e.weight === 'Cốt lõi' || e.weight === 'Tuyến chính' ? ' crit' : ''}">
                 <div class="tl-dot"></div>
                 <div class="tl-head">
                     <div class="tl-title">${h(e.title || '')}</div>
@@ -1419,7 +1425,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                 <div class="tl-brief">${h(e.summary || e.brief || '')}</div>
                 <div class="tl-meta">
                     <span>Nhân vật: ${participants || '—'}</span>
-                    <span class="imp">${h(e.type || '')}${e.type && e.weight ? ' · ' : ''}${h(e.weight || '')}</span>
+                    <span class="imp">${h(eT)}${eT && eW ? ' · ' : ''}${h(eW)}</span>
                 </div>
             </div>`;
         }).join(''));
@@ -1445,10 +1451,13 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         const fc = TREND_COLORS[fromTrend] || '#888';
         const tc = TREND_COLORS[toTrend] || '#888';
         const theme = getRelationTheme();
+        
+        const ftText = TREND_MAP[fromTrend] || fromTrend;
+        const ttText = TREND_MAP[toTrend] || toTrend;
 
         setHtml(tip, `<div style="line-height:1.8">
-            ${fromLabel ? `<div><small>${h(from)}→${h(to)}：</small> <span style="color:${fc}">${h(fromLabel)}</span> <span style="font-size:10px;color:${fc}">[${h(fromTrend)}]</span></div>` : ''}
-            ${toLabel ? `<div><small>${h(to)}→${h(from)}：</small> <span style="color:${tc}">${h(toLabel)}</span> <span style="font-size:10px;color:${tc}">[${h(toTrend)}]</span></div>` : ''}
+            ${fromLabel ? `<div><small>${h(from)}→${h(to)}:</small> <span style="color:${fc}">${h(fromLabel)}</span> <span style="font-size:10px;color:${fc}">[${h(ftText)}]</span></div>` : ''}
+            ${toLabel ? `<div><small>${h(to)}→${h(from)}:</small> <span style="color:${tc}">${h(toLabel)}</span> <span style="font-size:10px;color:${tc}">[${h(ttText)}]</span></div>` : ''}
         </div>`);
 
         tip.style.cssText = mobile
@@ -1619,8 +1628,8 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         const txt = $('sel-char-text');
         if (!opts) return;
         if (!arcs?.length) {
-            setHtml(opts, '<div class="sel-opt" data-value="">Chưa có nhân vật</div>');
-            if (txt) txt.textContent = 'Chưa có nhân vật';
+            setHtml(opts, '<div class="sel-opt" data-value="">Chưa có dữ liệu</div>');
+            if (txt) txt.textContent = 'Chưa có dữ liệu';
             currentCharacterId = null;
             return;
         }
@@ -1653,7 +1662,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
 
         const arc = arcs.find(a => (a.id || a.name) === currentCharacterId);
         if (!arc) {
-            setHtml(c, '<div class="empty">Không tìm thấy dữ liệu nhân vật</div>');
+            setHtml(c, '<div class="empty">Không tìm thấy dữ liệu</div>');
             return;
         }
 
@@ -1686,22 +1695,22 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             </div>
             <div class="prof-rels">
                 <div class="rels-group">
-                    <div class="rels-group-title">${h(name)} kết nối với người khác:</div>
+                    <div class="rels-group-title">Với người khác:</div>
                     ${outRels.length ? outRels.map(r => `
                         <div class="rel-item">
                             <span class="rel-target">Với ${h(r.to)}:</span>
                             <span class="rel-label">${h(r.label || '—')}</span>
-                            ${r.trend ? `<span class="rel-trend ${TREND_CLASS[r.trend] || ''}">${h(r.trend)}</span>` : ''}
+                            ${r.trend ? `<span class="rel-trend ${TREND_CLASS[r.trend] || ''}">${h(TREND_MAP[r.trend] || r.trend)}</span>` : ''}
                         </div>
                     `).join('') : '<div class="empty" style="padding:16px">Chưa có dữ liệu</div>'}
                 </div>
                 <div class="rels-group">
-                    <div class="rels-group-title">Người khác kết nối với ${h(name)}:</div>
+                    <div class="rels-group-title">Người khác với ${h(name)}:</div>
                     ${inRels.length ? inRels.map(r => `
                         <div class="rel-item">
                             <span class="rel-target">${h(r.from)}:</span>
                             <span class="rel-label">${h(r.label || '—')}</span>
-                            ${r.trend ? `<span class="rel-trend ${TREND_CLASS[r.trend] || ''}">${h(r.trend)}</span>` : ''}
+                            ${r.trend ? `<span class="rel-trend ${TREND_CLASS[r.trend] || ''}">${h(TREND_MAP[r.trend] || r.trend)}</span>` : ''}
                         </div>
                     `).join('') : '<div class="empty" style="padding:16px">Chưa có dữ liệu</div>'}
                 </div>
@@ -1770,7 +1779,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
      * 显示通用确认弹窗
      * @returns {Promise<boolean>}
      */
-    function showConfirm(title, message, okText = 'Thực thi', cancelText = 'Hủy') {
+    function showConfirm(title, message, okText = 'Xác nhận', cancelText = 'Hủy') {
         return new Promise(resolve => {
             const modal = $('confirm-modal');
             const titleEl = $('confirm-title');
@@ -1812,7 +1821,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         });
     }
 
-    function showConfirmInput(title, message, okText = 'Thực thi', cancelText = 'Hủy', placeholder = '') {
+    function showConfirmInput(title, message, okText = 'Xác nhận', cancelText = 'Hủy', placeholder = '') {
         return new Promise(resolve => {
             const modal = $('confirm-modal');
             const titleEl = $('confirm-title');
@@ -1876,28 +1885,28 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             const backdrop = $('confirm-backdrop');
             const busy = isBusyLike();
 
-            titleEl.textContent = 'Dọn dẹp dữ liệu tóm tắt';
+            titleEl.textContent = 'Dọn dẹp dữ liệu';
             msgEl.textContent = 'Vui lòng chọn thao tác dọn dẹp.';
             inputWrap.classList.add('hidden');
             inputEl.value = '';
             actionList.classList.remove('hidden');
             okBtn.classList.add('hidden');
-            cancelBtn.textContent = 'Thoát';
+            cancelBtn.textContent = 'Hủy';
 
             if (busy) {
                 rollbackBtn.disabled = true;
                 clearBtn.disabled = true;
-                rollbackDesc.textContent = 'Đang có tiến trình chạy, tạm thời không thể thực thi.';
-                clearDesc.textContent = 'Đang có tiến trình chạy, tạm thời không thể thực thi.';
+                rollbackDesc.textContent = 'Đang có tiến trình chạy, không thể thực hiện.';
+                clearDesc.textContent = 'Đang có tiến trình chạy, không thể thực hiện.';
             } else {
                 rollbackBtn.disabled = !cleanActionState.canRollback;
                 clearBtn.disabled = false;
                 rollbackDesc.textContent = cleanActionState.canRollback
                     ? (cleanActionState.rollbackWillResetBoundary
-                        ? 'Hoàn tác nội dung của lần tóm tắt đầu tiên; các sửa đổi thủ công sẽ không bị ghi đè, nếu có xung đột sẽ từ chối hoàn tác. Lịch sử chat sẽ không bị xóa.'
-                        : `Hoàn tác lần tóm tắt gần nhất, số tin đã tóm tắt sẽ lùi về ${cleanActionState.rollbackTargetSummarizedUpTo} tin. Lịch sử chat sẽ không bị xóa.`)
-                    : 'Hiện không có bản sao lưu tóm tắt nào để hoàn tác.';
-                clearDesc.textContent = 'Xóa toàn bộ dữ liệu tóm tắt của chat này, lịch sử chat sẽ không bị xóa.';
+                        ? 'Hoàn tác lần tóm tắt đầu tiên; sửa đổi thủ công sẽ không bị đè, từ chối nếu có xung đột.'
+                        : `Hoàn tác lần tóm tắt trước, số tin đã tóm tắt sẽ lùi về ${cleanActionState.rollbackTargetSummarizedUpTo}. Lịch sử chat không bị xóa.`)
+                    : 'Không có bản sao lưu tóm tắt nào để hoàn tác.';
+                clearDesc.textContent = 'Xóa toàn bộ dữ liệu tóm tắt của chat này, lịch sử chat không bị xóa.';
             }
 
             const close = (result) => {
@@ -1937,12 +1946,12 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                 ${list.map((a, i) => `
                     <div class="struct-item arc-item" data-index="${i}">
                         <div class="struct-row"><input type="text" class="arc-name" placeholder="Tên nhân vật" value="${h(a.name || '')}"></div>
-                        <div class="struct-row"><textarea class="arc-trajectory" rows="2" placeholder="Mô tả trạng thái hiện tại">${h(a.trajectory || '')}</textarea></div>
+                        <div class="struct-row"><textarea class="arc-trajectory" rows="2" placeholder="Trạng thái hiện tại">${h(a.trajectory || '')}</textarea></div>
                         <div class="struct-row">
                             <label style="font-size:.75rem;color:var(--txt3)">Tiến độ: <input type="number" class="arc-progress" min="0" max="100" value="${Math.round((a.progress || 0) * 100)}" style="width:64px;display:inline-block"> %</label>
                         </div>
                         <div class="struct-row"><textarea class="arc-moments" rows="3" placeholder="Khoảnh khắc quan trọng, mỗi dòng 1 mục">${h((a.moments || []).map(m => typeof m === 'string' ? m : m.text).join('\n'))}</textarea></div>
-                        <div class="struct-actions"><span>Quỹ đạo nhân vật ${i + 1}</span></div>
+                        <div class="struct-actions"><span>Quỹ đạo ${i + 1}</span></div>
                     </div>
                 `).join('')}
             </div>
@@ -1959,12 +1968,12 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             div.dataset.index = idx;
             setHtml(div, `
                 <div class="struct-row"><input type="text" class="arc-name" placeholder="Tên nhân vật"></div>
-                <div class="struct-row"><textarea class="arc-trajectory" rows="2" placeholder="Mô tả trạng thái hiện tại"></textarea></div>
+                <div class="struct-row"><textarea class="arc-trajectory" rows="2" placeholder="Trạng thái hiện tại"></textarea></div>
                 <div class="struct-row">
                     <label style="font-size:.75rem;color:var(--txt3)">Tiến độ: <input type="number" class="arc-progress" min="0" max="100" value="0" style="width:64px;display:inline-block"> %</label>
                 </div>
                 <div class="struct-row"><textarea class="arc-moments" rows="3" placeholder="Khoảnh khắc quan trọng, mỗi dòng 1 mục"></textarea></div>
-                <div class="struct-actions"><span>Quỹ đạo nhân vật ${idx + 1}</span></div>
+                <div class="struct-actions"><span>Quỹ đạo ${idx + 1}</span></div>
             `);
             addDeleteHandler(div);
             listEl.appendChild(div);
@@ -1986,16 +1995,16 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             content.classList.remove('recall-empty');
         } else {
             setHtml(content, `<div class="recall-empty">
-            Chưa có nhật ký gọi lại<br><br>
-            Khi AI tạo phản hồi, hệ thống sẽ tự động gọi lại ký ức.<br><br>
-            Nhật ký gọi lại sẽ hiển thị:<br>
-            • [L0] Query Understanding - Nhận diện ý định<br>
+            Chưa có nhật ký truy xuất<br><br>
+            Khi AI tạo tin nhắn, hệ thống sẽ tự động gọi lại ký ức.<br><br>
+            Nhật ký sẽ hiển thị:<br>
+            • [L0] Query Understanding - Nhận dạng ý định<br>
             • [L1] Constraints - Bơm ràng buộc cứng<br>
-            • [L2] Narrative Retrieval - Gọi lại sự kiện<br>
-            • [L3] Evidence Assembly - Lắp ráp bằng chứng<br>
+            • [L2] Narrative Retrieval - Truy xuất sự kiện<br>
+            • [L3] Evidence Assembly - Gắn kết bằng chứng<br>
             • [L4] Prompt Formatting - Định dạng<br>
-            • [Budget] Tình trạng sử dụng ngân sách Token<br>
-            • [Quality] Chỉ số chất lượng & Vấn đề tiềm ẩn
+            • [Budget] Ngân sách Token<br>
+            • [Quality] Chỉ số chất lượng
         </div>`);
         }
     }
@@ -2032,6 +2041,9 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             if (m) maxId = Math.max(maxId, +m[1]);
         });
 
+        const evtTypes = ['Gặp gỡ', 'Xung đột', 'Tiết lộ', 'Lựa chọn', 'Gắn kết', 'Chuyển biến', 'Gỡ nút', 'Đời thường'];
+        const evtWeights = ['Cốt lõi', 'Tuyến chính', 'Bước ngoặt', 'Điểm nhấn', 'Không khí'];
+
         const es = $('editor-struct');
         setHtml(es, list.map(ev => {
             const id = ev.id || `evt-${++maxId}`;
@@ -2044,11 +2056,11 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                     <textarea class="event-summary" rows="2" placeholder="Mô tả 1 câu">${h(ev.summary || '')}</textarea>
                 </div>
                 <div class="struct-row">
-                    <input type="text" class="event-participants" placeholder="Nhân vật (cách nhau bằng dấu phẩy)" value="${h((ev.participants || []).join('、'))}">
+                    <input type="text" class="event-participants" placeholder="Nhân vật (cách nhau dấu phẩy)" value="${h((ev.participants || []).join('、'))}">
                 </div>
                 <div class="struct-row">
-                    <select class="event-type">${['Gặp gỡ', 'Xung đột', 'Tiết lộ', 'Lựa chọn', 'Gắn kết', 'Chuyển biến', 'Gỡ nút', 'Đời thường'].map(t => `<option ${ev.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
-                    <select class="event-weight">${['Cốt lõi', 'Tuyến chính', 'Bước ngoặt', 'Điểm nhấn', 'Không khí'].map(t => `<option ${ev.weight === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+                    <select class="event-type">${evtTypes.map(t => `<option ${(TYPE_MAP[ev.type]||ev.type) === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+                    <select class="event-weight">${evtWeights.map(t => `<option ${(WEIGHT_MAP[ev.weight]||ev.weight) === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
                 </div>
                 <div class="struct-actions"><span>ID：${h(id)}</span></div>
             </div>`;
@@ -2069,10 +2081,10 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             setHtml(div, `
                 <div class="struct-row"><input type="text" class="event-title" placeholder="Tiêu đề sự kiện"><input type="text" class="event-time" placeholder="Nhãn thời gian"></div>
                 <div class="struct-row"><textarea class="event-summary" rows="2" placeholder="Mô tả 1 câu"></textarea></div>
-                <div class="struct-row"><input type="text" class="event-participants" placeholder="Nhân vật (cách nhau bằng dấu phẩy)"></div>
+                <div class="struct-row"><input type="text" class="event-participants" placeholder="Nhân vật (cách nhau dấu phẩy)"></div>
                 <div class="struct-row">
-                    <select class="event-type">${['Gặp gỡ', 'Xung đột', 'Tiết lộ', 'Lựa chọn', 'Gắn kết', 'Chuyển biến', 'Gỡ nút', 'Đời thường'].map(t => `<option>${t}</option>`).join('')}</select>
-                    <select class="event-weight">${['Cốt lõi', 'Tuyến chính', 'Bước ngoặt', 'Điểm nhấn', 'Không khí'].map(t => `<option>${t}</option>`).join('')}</select>
+                    <select class="event-type">${evtTypes.map(t => `<option>${t}</option>`).join('')}</select>
+                    <select class="event-weight">${evtWeights.map(t => `<option>${t}</option>`).join('')}</select>
                 </div>
                 <div class="struct-actions"><span>ID：${h(nid)}</span></div>
             `);
@@ -2104,7 +2116,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                             <input type="text" class="char-rel-from" placeholder="Nhân vật A" value="${h(r.from || '')}">
                             <input type="text" class="char-rel-to" placeholder="Nhân vật B" value="${h(r.to || '')}">
                             <input type="text" class="char-rel-label" placeholder="Quan hệ" value="${h(r.label || '')}">
-                            <select class="char-rel-trend">${trendOpts.map(t => `<option ${r.trend === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
+                            <select class="char-rel-trend">${trendOpts.map(t => `<option ${(TREND_MAP[r.trend]||r.trend) === t ? 'selected' : ''}>${t}</option>`).join('')}</select>
                         </div>
                     `).join('')}
                 </div>
@@ -2156,7 +2168,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                 .filter(f => !f.retracted)
                 .map(f => {
                     const parts = [f.s, f.p, f.o];
-                    if (f.trend) parts.push(f.trend);
+                    if (f.trend) parts.push(TREND_MAP[f.trend] || f.trend);
                     return parts.join('|');
                 })
                 .join('\n');
@@ -2423,7 +2435,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                 if (!d.requestId || d.requestId !== pendingSummaryModelFetchRequestId) break;
                 pendingSummaryModelFetchRequestId = '';
                 resetSummaryModelFetchUi();
-                setStatusText($('api-connect-status'), 'Lấy thất bại: ' + (d.message || 'Vui lòng kiểm tra lại URL và KEY'), 'error');
+                setStatusText($('api-connect-status'), 'Lấy thất bại: ' + (d.message || 'Kiểm tra lại URL và KEY'), 'error');
                 break;
 
             case 'VECTOR_CONFIG':
@@ -2486,9 +2498,9 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             case 'SUMMARY_COPY_RESULT':
                 $('btn-copy-summary').disabled = false;
                 if (d.success) {
-                    $('summary-io-status').textContent = `Sao chép thành công: ${d.events || 0} sự kiện, ${d.facts || 0} trạng thái thế giới`;
+                    $('summary-io-status').textContent = `Copy thành công: ${d.events || 0} sự kiện, ${d.facts || 0} thế giới`;
                 } else {
-                    $('summary-io-status').textContent = 'Sao chép thất bại: ' + (d.error || 'Lỗi không xác định');
+                    $('summary-io-status').textContent = 'Copy thất bại: ' + (d.error || 'Lỗi không xác định');
                 }
                 break;
 
@@ -2496,7 +2508,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                 $('btn-import-summary').disabled = false;
                 if (d.success) {
                     const c = d.counts || {};
-                    $('summary-io-status').textContent = `Nhập thành công: ${c.events || 0} sự kiện, ${c.facts || 0} trạng thái thế giới, đã ghi đè dữ liệu tóm tắt và xóa vector/điểm neo, vui lòng bấm "Tái tạo toàn bộ".`;
+                    $('summary-io-status').textContent = `Nhập thành công: ${c.events || 0} sự kiện, ${c.facts || 0} thế giới, đã đè lên dữ liệu cũ và xóa vector. Hãy bấm "Tái tạo toàn bộ".`;
                     postMsg('REQUEST_VECTOR_STATS');
                     postMsg('REQUEST_ANCHOR_STATS');
                 } else {
@@ -2507,7 +2519,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             case 'VECTOR_IMPORT_RESULT':
                 $('btn-import-vectors').disabled = false;
                 if (d.success) {
-                    let msg = `Nhập thành công: ${d.chunkCount} đoạn (chunk), ${d.eventCount} sự kiện`;
+                    let msg = `Nhập thành công: ${d.chunkCount} đoạn, ${d.eventCount} sự kiện`;
                     if (d.warnings?.length) {
                         msg += '\n⚠️ ' + d.warnings.join('\n⚠️ ');
                     }
@@ -2521,7 +2533,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             case 'VECTOR_BACKUP_RESULT':
                 $('btn-backup-server').disabled = false;
                 if (d.success) {
-                    $('server-io-status').textContent = `☁️ Sao lưu thành công: ${(d.size / 1024 / 1024).toFixed(2)}MB (${d.chunkCount} đoạn (chunk), ${d.eventCount} sự kiện)`;
+                    $('server-io-status').textContent = `☁️ Sao lưu thành công: ${(d.size / 1024 / 1024).toFixed(2)}MB (${d.chunkCount} đoạn, ${d.eventCount} sự kiện)`;
                 } else {
                     $('server-io-status').textContent = 'Sao lưu thất bại: ' + (d.error || 'Lỗi không xác định');
                 }
@@ -2530,7 +2542,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             case 'VECTOR_RESTORE_RESULT':
                 $('btn-restore-server').disabled = false;
                 if (d.success) {
-                    let msg = `☁️ Khôi phục thành công: ${d.chunkCount} đoạn (chunk), ${d.eventCount} sự kiện`;
+                    let msg = `☁️ Khôi phục thành công: ${d.chunkCount} đoạn, ${d.eventCount} sự kiện`;
                     if (d.warnings?.length) {
                         msg += '\n⚠️ ' + d.warnings.join('\n⚠️ ');
                     }
@@ -2637,13 +2649,13 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
             if (action === 'rollback') {
                 const currentUpTo = cleanActionState.summarizedUpTo || 0;
                 const rollbackMessage = cleanActionState.rollbackWillResetBoundary
-                    ? 'Bạn có chắc muốn hoàn tác lần tóm tắt đầu tiên? Nội dung tạo ra sẽ bị hủy bỏ; sửa đổi thủ công không bị ghi đè, từ chối hoàn tác nếu có xung đột. Lịch sử chat không bị xóa.'
+                    ? 'Bạn có chắc muốn hoàn tác lần tóm tắt đầu tiên? Nội dung tạo ra sẽ bị hủy bỏ; sửa đổi thủ công không bị ghi đè, từ chối hoàn tác nếu có xung đột.'
                     : `Bạn có chắc muốn hoàn tác lần tóm tắt trước? Sẽ lùi số tin đã tóm tắt từ ${currentUpTo} về ${cleanActionState.rollbackTargetSummarizedUpTo}. Lịch sử chat sẽ không bị xóa.`;
-                if (await showConfirm('Hoàn tác 1 lần', rollbackMessage, 'Hoàn tác', 'Hủy')) {
+                if (await showConfirm('Hoàn tác', rollbackMessage, 'Hoàn tác', 'Hủy')) {
                     postMsg('REQUEST_ROLLBACK_ONCE');
                 }
             } else if (action === 'clear') {
-                if (await showConfirm('Xóa tất cả', 'Bạn có chắc chắn muốn xóa sạch toàn bộ tóm tắt, từ khóa và dữ liệu quan hệ nhân vật của chat này không? Lịch sử chat sẽ không bị xóa. Thao tác này không thể hoàn tác.', 'Xóa sạch', 'Hủy')) {
+                if (await showConfirm('Xóa tất cả', 'Bạn có chắc chắn muốn xóa sạch toàn bộ dữ liệu của tính năng này không? Thao tác này không thể hoàn tác.', 'Xóa sạch', 'Hủy')) {
                     postMsg('REQUEST_CLEAR');
                 }
             }
