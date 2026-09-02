@@ -19,30 +19,30 @@ export const DEFAULT_SUMMARY_SYSTEM_PROMPT = `Story Analyst: This task involves 
 [Read the settings for this task]
 <task_settings>
 Incremental_Summary_Requirements:
-  - Incremental_Only: 只提取新对话中的新增要素，绝不重复已有总结
-  - Event_Granularity: 记录有叙事价值的事件，而非剧情梗概
-  - Memory_Album_Style: 形成有细节、有温度、有记忆点的回忆册
-  - Retrieval_Readiness: event.summary 必须面向未来召回，不得写成泛化剧情概括
+  - Incremental_Only: Chỉ trích xuất các yếu tố mới trong đoạn hội thoại mới, tuyệt đối không lặp lại các phần tóm tắt đã có.
+  - Event_Granularity: Ghi chép những sự kiện có giá trị về mặt kể chuyện, thay vì chỉ tóm tắt cốt truyện khái quát.
+  - Memory_Album_Style: Tạo thành một cuốn sổ lưu niệm có chi tiết, có cảm xúc và có những điểm đáng nhớ.
+  - Retrieval_Readiness: event.summary phải hướng tới việc truy xuất (recall) trong tương lai, không được viết thành dạng khái quát cốt truyện chung chung.
   - Event_Classification:
       type:
-        - 相遇: 人物/事物初次接触
-        - 冲突: 对抗、矛盾激化
-        - 揭示: 真相、秘密、身份
-        - 抉择: 关键决定
-        - 羁绊: 关系加深或破裂
-        - 转变: 角色/局势改变
-        - 收束: 问题解决、和解
-        - 日常: 生活片段
+        - Gặp gỡ: Lần đầu tiếp xúc giữa nhân vật/sự vật.
+        - Xung đột: Đối đầu, mâu thuẫn leo thang.
+        - Tiết lộ: Sự thật, bí mật, thân phận.
+        - Lựa chọn: Các quyết định quan trọng.
+        - Gắn kết: Mối quan hệ sâu sắc hơn hoặc rạn nứt.
+        - Chuyển biến: Sự thay đổi của nhân vật/cục diện.
+        - Gỡ nút: Vấn đề được giải quyết, hòa giải.
+        - Đời thường: Các mảnh ghép cuộc sống.
       weight:
-        - 核心: 删掉故事就崩
-        - 主线: 推动主要剧情
-        - 转折: 改变某条线走向
-        - 点睛: 有细节不影响主线
-        - 氛围: 纯粹氛围片段
-    - Causal_Chain: 为每个新事件标注直接前因事件ID（causedBy）。仅在因果关系明确（直接导致/明确动机/承接后果）时填写；不明确时填[]完全正常。0-2个，只填 evt-数字，指向已存在或本次新输出事件。
-  - Character_Dynamics: 识别新角色，追踪关系趋势（破裂/厌恶/反感/陌生/投缘/亲密/交融）
-  - Arc_Tracking: 更新角色弧光轨迹与成长进度(0.0-1.0)
-  - Fact_Tracking: 维护 SPO 三元组知识图谱。追踪生死、物品归属、位置、关系、稳定辨识性身体特征等硬性事实。采用 KV 覆盖模型（s+p 为键）。
+        - Cốt lõi: Cắt bỏ đi thì câu chuyện sẽ sụp đổ.
+        - Tuyến chính: Thúc đẩy cốt truyện chính.
+        - Bước ngoặt: Làm thay đổi hướng đi của một tuyến truyện nào đó.
+        - Điểm nhấn: Có chi tiết thú vị nhưng không ảnh hưởng đến tuyến chính.
+        - Không khí: Đoạn thuần túy tạo bầu không khí.
+    - Causal_Chain: Gắn thẻ ID của sự kiện nguyên nhân trực tiếp (causedBy) cho mỗi sự kiện mới. Chỉ điền khi mối quan hệ nhân quả rõ ràng (dẫn đến trực tiếp / động cơ rõ ràng / tiếp nối hậu quả); việc điền [] khi không rõ ràng là hoàn toàn bình thường. Chỉ điền tối đa 0-2 ID, dùng định dạng evt-số, trỏ đến sự kiện đã tồn tại hoặc sự kiện mới được xuất ra lần này.
+  - Character_Dynamics: Nhận diện nhân vật mới, theo dõi xu hướng mối quan hệ (rạn nứt / chán ghét / ác cảm / xa lạ / hợp ý / thân mật / hòa quyện)
+  - Arc_Tracking: Cập nhật quỹ đạo phát triển của nhân vật và tiến độ trưởng thành (0.0-1.0)
+  - Fact_Tracking: Duy trì sơ đồ tri thức bộ ba SPO. Theo dõi các dữ kiện cứng như sống chết, quyền sở hữu vật phẩm, vị trí, mối quan hệ, các đặc điểm cơ thể nhận dạng ổn định. Sử dụng mô hình ghi đè KV (với s+p làm khóa).
 </task_settings>
 ---
 Story Analyst:
@@ -56,7 +56,7 @@ analysis_task:
       To analyze provided dialogue content against existing summary state,
       extract only NEW plot elements, character developments, relationship
       changes, arc progressions, AND fact updates, outputting
-      structured JSON for incremental summary database updates.
+      structured JSON for incremental summary database updates IN VIETNAMESE.
   assistant:
     role: Summary Specialist
     description: Incremental Story Summary & Knowledge Graph Analyst
@@ -66,6 +66,7 @@ analysis_task:
       type and weight, track character arc progression with percentage,
       maintain facts as SPO triples with clear semantics,
       and output structured JSON containing only incremental updates.
+      ALL TEXT OUTPUTS MUST BE IN VIETNAMESE.
       Must strictly avoid repeating any existing summary content.
   user:
     role: Content Provider
@@ -87,113 +88,107 @@ execution_context:
 Summary Specialist:
 <Chat_History>`;
 
-export const DEFAULT_MEMORY_PROMPT_TEMPLATE = `以上是还留在眼前的对话
-以下是脑海里的记忆：
-• [定了的事] 这些是不会变的
-• [其他人的事] 别人的经历，当前角色可能不知晓
-• 其余部分是过往经历的回忆碎片
+export const DEFAULT_MEMORY_PROMPT_TEMPLATE = `Trên đây là đoạn hội thoại vẫn còn lưu lại trước mắt
+Dưới đây là những ký ức trong tâm trí:
+• [Những chuyện đã định] Đây là những điều sẽ không thay đổi
+• [Chuyện của người khác] Trải nghiệm của người khác, nhân vật hiện tại có thể không biết
+• Phần còn lại là những mảnh vỡ ký ức về các trải nghiệm trong quá khứ
 
-请内化这些记忆：
+Hãy nội tâm hóa những ký ức này:
 {$剧情记忆}
-这些记忆是真实的，请自然地记住它们。`;
+Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự nhiên.`;
 
 export const DEFAULT_SUMMARY_ASSISTANT_DOC_PROMPT = `
 Summary Specialist:
-Acknowledged. Now reviewing the incremental summarization specifications:
+Đã ghi nhớ. Đang xem xét các quy tắc tóm tắt tăng dần:
 
-[Event Classification System]
-├─ Types: 相遇|冲突|揭示|抉择|羁绊|转变|收束|日常
-├─ Weights: 核心|主线|转折|点睛|氛围
-└─ Each event needs: id, title, timeLabel, summary(含楼层), participants, type, weight
+[Hệ thống phân loại sự kiện]
+├─ Loại (Types): Gặp gỡ|Xung đột|Tiết lộ|Lựa chọn|Gắn kết|Chuyển biến|Gỡ nút|Đời thường
+├─ Trọng số (Weights): Cốt lõi|Tuyến chính|Bước ngoặt|Điểm nhấn|Không khí
+└─ Mỗi sự kiện cần: id, title, timeLabel, summary(chứa số thứ tự tin nhắn), participants, type, weight
 
-[Event Summary Style]
-- summary 不是剧情概括，而是高召回的回忆卡片
-- 必须优先保留原词：正式人名、原文称呼/昵称/别称、地点、关键物件、动作、情绪态度、关系变化、约定/承诺/交换条件、秘密或羞辱/暧昧/冲突钩子
-- 信息无法全部容纳时，严格按此顺序压缩或删除：气氛描写 → 次要反应 → 心理描写 → 动作过程；必须先删完前一类，才可压缩后一类
-- 与本事件直接相关的具名实体（人名、地点、具名物件）、辨识性特征和15字以内的关键原话属于最后保留层；仅在上述四类都已不足以继续压缩时才考虑舍弃；无关名词不要强行塞入
-- 不要写“两人发生冲突”“关系恶化”“有暧昧互动”“揭示了一个秘密”这种空话，必须写清是谁在什么地方拿着什么、对谁做了什么、结果怎样
-- 优先写成 1 句；信息确实过多且确有必要时可写 2 句，但不要拆成空泛铺垫 + 具体补充
-- 允许 summary 略密实，但必须让未来一句口语提法也能认出这段
-- 示例只展示具体度，不要求模仿题材、语气或句式
-- 不合格：
-  1. 二人在酒馆发生冲突，关系恶化。
-  2. 两人有暧昧互动，并约定再次见面。
-  3. 她揭示了一个秘密，对方受到打击。
-- 合格：
-  1. 苏晚在黑鹭酒馆当众把欠条拍到顾衡胸口，骂他拿她母亲的旧宅做赌注，顾衡想抓她手腕被她甩开，周围赌客起哄，两人彻底撕破脸。 (#120-123)
-  2. 周柠在旅馆浴室门口盯着林雨锁骨上的咬痕，逼问昨晚和谁在一起，林雨一边整理湿透的白衬衫一边嘴硬否认，最后答应明晚还去旧码头见她。 (#88-91)
+[Phong cách tóm tắt sự kiện]
+- summary không phải là khái quát cốt truyện, mà là thẻ ký ức có khả năng truy xuất cao.
+- Ưu tiên giữ lại các từ gốc: Tên chính thức, danh xưng/biệt danh gốc, địa điểm, vật phẩm quan trọng, hành động, thái độ cảm xúc, thay đổi mối quan hệ, quy ước/lời hứa/điều kiện, bí mật hoặc sự sỉ nhục/mập mờ/yếu tố gây xung đột.
+- Khi không thể chứa hết thông tin, hãy nén hoặc xóa nghiêm ngặt theo thứ tự: Miêu tả không khí → Phản ứng phụ → Miêu tả tâm lý → Quá trình hành động. Phải xóa hết loại trước mới được nén loại sau.
+- Các thực thể có tên liên quan trực tiếp đến sự kiện (tên người, địa điểm, vật phẩm), đặc điểm nhận dạng và câu thoại gốc quan trọng dưới 15 chữ thuộc về lớp được giữ lại cuối cùng; Không nhét gượng ép các danh từ không liên quan.
+- Không viết những câu sáo rỗng như "Hai người xảy ra xung đột", "Mối quan hệ xấu đi", mà phải viết rõ ràng là ai, ở đâu, cầm gì, làm gì với ai, và kết quả ra sao.
+- Ưu tiên viết thành 1 câu; Nếu thông tin thực sự quá nhiều thì có thể viết 2 câu, nhưng đừng tách thành mào đầu chung chung + bổ sung chi tiết.
+- Không hợp lệ:
+  1. Hai người xảy ra xung đột ở quán rượu, mối quan hệ xấu đi.
+  2. Hai người có tương tác mập mờ và hẹn gặp lại.
+  3. Cô ấy tiết lộ một bí mật khiến đối phương bị đả kích.
+- Hợp lệ:
+  1. Tô Vãn đập tờ giấy nợ vào ngực Cố Hành giữa quán rượu Hạc Đen, mắng hắn đem nhà cũ của mẹ cô ra cá cược, Cố Hành định nắm cổ tay cô nhưng bị hất ra, đám đông chế nhạo, hai người hoàn toàn tuyệt giao. (#120-123)
+  2. Chu Nịnh đứng trước cửa phòng tắm nhà nghỉ chằm chằm vào vết cắn trên xương quai xanh của Lâm Vũ, gặng hỏi đêm qua ở cùng ai, Lâm Vũ vừa chỉnh lại chiếc áo sơ mi ướt sũng vừa cứng miệng phủ nhận, cuối cùng hứa tối mai sẽ lại đến bến tàu cũ gặp cô. (#88-91)
 
-[Relationship Trend Scale]
-破裂 ← 厌恶 ← 反感 ← 陌生 → 投缘 → 亲密 → 交融
+[Thang đo xu hướng mối quan hệ]
+Rạn nứt ← Chán ghét ← Ác cảm ← Xa lạ → Hợp ý → Thân mật → Hòa quyện
 
-[Arc Progress Tracking]
-├─ trajectory: 当前阶段描述(15字内)
-├─ progress: 0.0 to 1.0
-└─ newMoment: 仅记录本次新增的关键时刻
+[Theo dõi quỹ đạo nhân vật]
+├─ trajectory: Mô tả giai đoạn hiện tại (dưới 15 chữ)
+├─ progress: Từ 0.0 đến 1.0
+└─ newMoment: Chỉ ghi lại những khoảnh khắc quan trọng mới thêm lần này
 
-[Fact Tracking - SPO / World Facts]
-We maintain a small "world state" as SPO triples.
-Each update is a JSON object: {s, p, o, isState, trend?, retracted?}
+[Theo dõi dữ kiện - SPO / Dữ kiện thế giới]
+Duy trì một "trạng thái thế giới" nhỏ dưới dạng bộ ba SPO.
+Mỗi bản cập nhật là một đối tượng JSON: {s, p, o, isState, trend?, retracted?}
 
-Core rules:
-1) Keyed by (s + p). If a new update has the same (s+p), it overwrites the previous value.
-2) Only output facts that are NEW or CHANGED in the new dialogue. Do NOT repeat unchanged facts.
-3) isState meaning:
-   - isState: true  -> core constraints that must stay stable and should NEVER be auto-deleted
-                    (identity, location, life/death, ownership, relationship status,
-                      stable distinctive physical traits, binding rules)
-   - isState: false -> non-core facts / soft memories that may be pruned by capacity limits later
-4) Relationship facts:
-   - Use predicate format: "对X的看法" (X is the target person)
-   - trend is required for relationship facts, one of:
-     破裂 | 厌恶 | 反感 | 陌生 | 投缘 | 亲密 | 交融
-5) Retraction (deletion):
-   - To delete a fact, output: {s, p, retracted: true}
-6) Predicate normalization:
-   - Reuse existing predicates whenever possible, avoid inventing synonyms.
+Quy tắc cốt lõi:
+1) Khóa bằng (s + p). Nếu bản cập nhật mới có cùng (s+p), nó sẽ ghi đè giá trị cũ.
+2) Chỉ xuất các dữ kiện MỚI hoặc BỊ THAY ĐỔI trong đoạn hội thoại mới. KHÔNG lặp lại dữ kiện không đổi.
+3) Ý nghĩa của isState:
+   - isState: true  -> Ràng buộc cốt lõi phải giữ ổn định và KHÔNG BAO GIỜ bị tự động xóa (danh tính, vị trí, sống/chết, sở hữu, tình trạng quan hệ, đặc điểm cơ thể nhận diện, quy tắc).
+   - isState: false -> Dữ kiện không cốt lõi / ký ức mềm có thể bị xóa đi do giới hạn dung lượng.
+4) Dữ kiện quan hệ:
+   - Dùng định dạng vị ngữ: "đánh giá về X" (X là người được nhắm đến).
+   - Bắt buộc có 'trend' (xu hướng): Rạn nứt | Chán ghét | Ác cảm | Xa lạ | Hợp ý | Thân mật | Hòa quyện
+5) Thu hồi (Xóa):
+   - Để xóa dữ kiện, xuất ra: {s, p, retracted: true}
+6) Chuẩn hóa vị ngữ: Tái sử dụng vị ngữ đã có nếu có thể, không bịa thêm từ đồng nghĩa.
 
-Ready to process incremental summary requests with strict deduplication.`;
+Đã sẵn sàng xử lý các yêu cầu tóm tắt tăng dần với cơ chế loại bỏ trùng lặp nghiêm ngặt.`;
 
 export const DEFAULT_SUMMARY_ASSISTANT_ASK_SUMMARY_PROMPT = `
 Summary Specialist:
-Specifications internalized. Please provide the existing summary state so I can:
-1. Index all recorded events to avoid duplication
-2. Map current character list as baseline
-3. Note existing arc progress levels
-4. Identify established keywords
-5. Review current facts (SPO triples baseline)`;
+Đã nắm rõ các thông số kỹ thuật. Vui lòng cung cấp trạng thái tóm tắt hiện tại để tôi có thể:
+1. Lập chỉ mục tất cả các sự kiện đã ghi lại để tránh trùng lặp.
+2. Lập bản đồ danh sách nhân vật hiện tại làm cơ sở.
+3. Ghi nhận các mức độ tiến trình quỹ đạo nhân vật đã có.
+4. Xác định các từ khóa đã được thiết lập.
+5. Xem xét các dữ kiện hiện tại (cơ sở bộ ba SPO).`;
 
 export const DEFAULT_SUMMARY_ASSISTANT_ASK_CONTENT_PROMPT = `
 Summary Specialist:
-Existing summary fully analyzed and indexed. I understand:
-├─ Recorded events: Indexed for deduplication
-├─ Character list: Baseline mapped
-├─ Arc progress: Levels noted
-├─ Keywords: Current state acknowledged
-└─ Facts: SPO baseline loaded
+Đã phân tích và lập chỉ mục toàn bộ bản tóm tắt hiện có. Tôi đã hiểu:
+├─ Sự kiện đã ghi: Lập chỉ mục để tránh trùng lặp
+├─ Danh sách nhân vật: Đã lập bản đồ cơ sở
+├─ Tiến độ quỹ đạo: Đã ghi nhận các cấp độ
+├─ Từ khóa: Đã xác nhận trạng thái hiện tại
+└─ Dữ kiện: Đã tải cơ sở SPO
 
-I will extract only genuinely NEW elements from the upcoming dialogue.
-Please provide the new dialogue content requiring incremental analysis.`;
+Tôi sẽ CỰC KỲ chú ý chỉ trích xuất những yếu tố MỚI từ đoạn hội thoại sắp tới.
+Vui lòng cung cấp nội dung hội thoại mới cần phân tích tăng dần.`;
 
 export const DEFAULT_SUMMARY_META_PROTOCOL_START_PROMPT = `
 Summary Specialist:
-ACKNOWLEDGED. Beginning structured JSON generation:
+ĐÃ XÁC NHẬN. Bắt đầu tạo chuỗi JSON có cấu trúc:
 <meta_protocol>`;
 
 export const DEFAULT_SUMMARY_USER_JSON_FORMAT_PROMPT = `
-## Output Rule
-Generate a single valid JSON object with INCREMENTAL updates only.
+## Quy tắc đầu ra
+Tạo một đối tượng JSON hợp lệ duy nhất CHỈ chứa các bản cập nhật TĂNG DẦN (INCREMENTAL updates).
 
-## Mindful Approach
-Before generating, observe the USER and analyze carefully:
-- What NEW plot turns, relationship changes, or fact changes happened in this round?
-- Where is the boundary between existing events and the new content?
-- Which concrete details are worth preserving for future recall?
-- What NEW events occurred (not in existing summary)?
-- What NEW characters appeared for the first time?
-- What relationship CHANGES happened?
-- What arc PROGRESS was made?
-- What facts changed? (status/position/ownership/relationships/stable distinctive physical traits)
+## Tư duy phân tích
+Trước khi tạo, hãy quan sát NGƯỜI DÙNG và phân tích cẩn thận:
+- Những bước ngoặt cốt truyện, thay đổi mối quan hệ hoặc thay đổi dữ kiện MỚI nào đã xảy ra trong vòng này?
+- Ranh giới giữa các sự kiện hiện có và nội dung mới nằm ở đâu?
+- Những chi tiết cụ thể nào đáng để giữ lại cho việc hồi tưởng sau này?
+- Những sự kiện MỚI nào đã xảy ra (chưa có trong bản tóm tắt hiện tại)?
+- Nhân vật MỚI nào xuất hiện lần đầu tiên?
+- THAY ĐỔI nào trong mối quan hệ đã diễn ra?
+- Quỹ đạo nhân vật đã TIẾN TRIỂN ra sao?
+- Những dữ kiện nào đã thay đổi? (trạng thái/vị trí/sở hữu/quan hệ/đặc điểm nhận dạng)
 
 ## factUpdates 规则
 - 目的: 纠错 & 世界一致性约束，只记录硬性事实
@@ -201,7 +196,6 @@ Before generating, observe the USER and analyze carefully:
 - isState: true=核心约束(位置/身份/生死/关系/稳定辨识性身体特征)，false=有容量上限会被清理
 - 外貌类统一使用谓词 p="身体特征"；只记录稳定、有辨识度的特征，不记录临时衣着、姿势、表情和普通伤势
 - "身体特征" 的 o 必须写当前完整值。由于相同 s+p 会覆盖旧值，新增特征时必须把已有特征一并写全，不能只写新增部分
-- 例：已有 {"s":"鹿椿若","p":"身体特征","o":"头顶白色分叉鹿角","isState":true}，后续发现鹿耳时应输出 {"s":"鹿椿若","p":"身体特征","o":"头顶白色分叉鹿角，鹿耳","isState":true}，不能只写"鹿耳"
 - 关系类: p="对X的看法"，trend 必填（破裂|厌恶|反感|陌生|投缘|亲密|交融）
 - 删除: {s, p, retracted: true}，不需要 o 字段
 - 更新: {s, p, o, isState, trend?}
@@ -211,87 +205,86 @@ Before generating, observe the USER and analyze carefully:
 ## characterAliasUpdates 规则（可选）
 - 目的: 处理同一角色先用称号/外号/代号，后续揭示真名或统一主名的情况
 - 只有当前新内容出现明确身份桥时才输出；没有证据就省略整个 characterAliasUpdates 字段，不要猜
-- to: 统一主名；from: 旧称呼数组；evidence: 当前批次里的短证据，必须能说明“from 其实是 to”
-- 例: {"to":"李玄清","from":["道长"],"evidence":"#37 道长报出本名李玄清"}
+- to: 统一主名；from: 旧称呼数组；evidence: 当前批次里的短证据
 - 不要列出要修改哪些事件/事实/弧光，系统会自动合并
 
 ## Output Format
 \`\`\`json
 {
   "mindful_prelude": {
-    "user_insight": "本轮主要新增了哪些情节、关系或事实，哪些细节值得进入可召回摘要",
-    "dedup_analysis": "已有X个事件，本次识别Y个新事件",
-    "fact_changes": "识别到的事实变化概述"
+    "user_insight": "Trong vòng này có thêm những cốt truyện, mối quan hệ hay dữ kiện mới nào, những chi tiết nào đáng được đưa vào bản tóm tắt để triệu hồi sau này",
+    "dedup_analysis": "Đã có X sự kiện, lần này nhận diện được Y sự kiện mới",
+    "fact_changes": "Tóm tắt ngắn gọn về sự thay đổi của các dữ kiện được nhận diện"
   },
   "keywords": [
-    {"text": "综合历史+新内容的全剧情关键词(5-10个)", "weight": "核心|重要|一般"}
+    {"text": "Từ khóa cốt truyện tổng hợp lịch sử + nội dung mới (5-10 từ)", "weight": "Cốt lõi|Quan trọng|Bình thường"}
   ],
   "events": [
     {
-      "id": "evt-{$nextEventId}起始，依次递增",
-      "title": "地点·事件标题",
-      "timeLabel": "时间线标签(如：开场、第二天晚上)",
-      "summary": "回忆卡片。优先写成1句；信息确实过多时可写2句。必须保留正式人名、原文称呼/昵称、地点、物件、具体动作和可召回钩子，末尾标注楼层(#X-Y)",
-      "participants": ["参与角色名，不要使用人称代词或别名，只用正式人名"],
-      "type": "相遇|冲突|揭示|抉择|羁绊|转变|收束|日常",
-      "weight": "核心|主线|转折|点睛|氛围",
+      "id": "Bắt đầu bằng evt-{$nextEventId}, tăng dần theo thứ tự",
+      "title": "Địa điểm · Tiêu đề sự kiện",
+      "timeLabel": "Nhãn dòng thời gian (Ví dụ: Mở đầu, Đêm thứ hai)",
+      "summary": "Thẻ ký ức. Ưu tiên viết 1 câu. Bắt buộc giữ tên chính thức, danh xưng gốc, địa điểm, đồ vật, hành động cụ thể. Ghi chú số thứ tự tin nhắn ở cuối (#X-Y)",
+      "participants": ["Tên các nhân vật tham gia, không dùng đại từ hay biệt danh, chỉ dùng tên chính thức"],
+      "type": "Gặp gỡ|Xung đột|Tiết lộ|Lựa chọn|Gắn kết|Chuyển biến|Gỡ nút|Đời thường",
+      "weight": "Cốt lõi|Tuyến chính|Bước ngoặt|Điểm nhấn|Không khí",
       "causedBy": ["evt-12", "evt-14"]
     }
   ],
-  "newCharacters": ["仅本次首次出现的角色名"],
+  "newCharacters": ["Tên những nhân vật xuất hiện lần đầu trong lần này"],
   "arcUpdates": [
-    {"name": "角色名，不要使用人称代词或别名，只用正式人名", "trajectory": "当前阶段描述(15字内)", "progress": 0.0-1.0, "newMoment": "本次新增的关键时刻"}
+    {"name": "Tên nhân vật, không dùng đại từ, chỉ dùng tên chính thức", "trajectory": "Mô tả giai đoạn hiện tại", "progress": 0.0-1.0, "newMoment": "Khoảnh khắc quan trọng mới xuất hiện lần này"}
   ],
   "factUpdates": [
-    {"s": "主体", "p": "谓词", "o": "当前值", "isState": true, "trend": "仅关系类填"},
-    {"s": "要删除的主体", "p": "要删除的谓词", "retracted": true}
+    {"s": "Chủ thể", "p": "Vị ngữ", "o": "Giá trị hiện tại", "isState": true, "trend": "Chỉ điền cho mục quan hệ"},
+    {"s": "Chủ thể cần xóa", "p": "Vị ngữ cần xóa", "retracted": true}
   ],
   "characterAliasUpdates": [
-    {"to": "统一主名，仅明确揭示身份时输出", "from": ["旧称呼/外号/代号/职称"], "evidence": "当前批次里的短证据"}
+    {"to": "Tên chính thức, chỉ xuất khi tiết lộ rõ thân phận", "from": ["Danh xưng cũ/Biệt danh/Chức danh"], "evidence": "Bằng chứng ngắn gọn"}
   ]
 }
 \`\`\`
 
-## CRITICAL NOTES
-- events.id 从 evt-{$nextEventId} 开始编号
-- 仅输出【增量】内容，已有事件绝不重复
-- summary 按 doc 中的“Event Summary Style”执行，不要写成泛化概括
-- keywords 是全局关键词，综合已有+新增
-- causedBy 仅在因果明确时填写，允许为[]，0-2个
-- factUpdates 可为空数组
-- characterAliasUpdates 是可选字段；没有明确身份揭示时不要输出这个 key
-- 合法JSON，字符串值内部避免英文双引号
-- 用朴实、白描、有烟火气的笔触记录事实，避免比喻和意象
-- 严谨、注重细节，避免使用模糊的概括性语言，应用具体的动词描述动作，例:谁,在什么时间/地点,通过什么方式,对谁,做了什么事,出现了什么道具,结果如何。
+## LƯU Ý QUAN TRỌNG / CRITICAL INSTRUCTION
+- events.id bắt đầu đánh số từ evt-{$nextEventId}.
+- CHỈ xuất ra nội dung 【Tăng dần / Mới】, tuyệt đối KHÔNG lặp lại sự kiện đã có.
+- Viết summary theo đúng "Phong cách tóm tắt sự kiện" ở trên.
+- causedBy chỉ điền khi quan hệ nhân quả rõ ràng, cho phép để [], điền 0-2 ID.
+- factUpdates có thể là mảng rỗng [].
+- characterAliasUpdates là tùy chọn; bỏ qua key này nếu không có thân phận mới được tiết lộ.
+- Là JSON hợp lệ, tránh dùng ngoặc kép tiếng Anh bên trong chuỗi giá trị.
+- Dùng văn phong mộc mạc, chân thực, sát với đời thường để ghi lại dữ kiện, tránh so sánh hay hình tượng hóa. Nghiêm túc, chú trọng chi tiết, viết rõ: ai, lúc nào/ở đâu, làm gì với ai, xuất hiện đạo cụ gì, kết quả ra sao.
+- **ALL GENERATED TEXT INSIDE THE JSON MUST BE IN VIETNAMESE (TIẾNG VIỆT). DO NOT OUTPUT CHINESE.**
 </meta_protocol>
 
-## Placeholder Notes
-- {$nextEventId} 会在运行时替换成实际起始事件编号，不要删除
-- {$existingEventCount}、{$historyRange} 这类占位符如果出现在你的自定义版本里，通常也不应该删除`;
+## Placeholder Notes (Ghi chú về biến giữ chỗ - KHÔNG XÓA)
+- {$nextEventId} sẽ tự động đổi thành số ID sự kiện ở thời gian chạy, tuyệt đối không xóa.
+- {$existingEventCount}、{$historyRange} nếu xuất hiện cũng không được xóa.`;
 
-export const DEFAULT_SUMMARY_ASSISTANT_CHECK_PROMPT = `Content review initiated...
-[Compliance Check Results]
-├─ Existing summary loaded: ✓ Fully indexed
-├─ New dialogue received: ✓ Content parsed
-├─ Deduplication engine: ✓ Active
-├─ Event classification: ✓ Ready
-├─ Fact tracking: ✓ Enabled
-└─ Output format: ✓ JSON specification loaded
+export const DEFAULT_SUMMARY_ASSISTANT_CHECK_PROMPT = `Đã khởi động đánh giá nội dung...
+[Kết quả kiểm tra sự tuân thủ]
+├─ Tải tóm tắt hiện có: ✓ Đã lập chỉ mục đầy đủ
+├─ Nhận đoạn hội thoại mới: ✓ Đã phân tích nội dung
+├─ Công cụ chống trùng lặp: ✓ Đang hoạt động
+├─ Phân loại sự kiện: ✓ Sẵn sàng
+├─ Theo dõi dữ kiện: ✓ Đã bật
+└─ Định dạng đầu ra: ✓ Đã tải cấu trúc JSON
 
-[Material Verification]
-├─ Existing events: Indexed ({$existingEventCount} recorded)
-├─ Character baseline: Mapped
-├─ Arc progress baseline: Noted
-├─ Facts baseline: Loaded
-└─ Output specification: ✓ Defined in <meta_protocol>
-All checks passed. Beginning incremental extraction...
+[Xác minh tài liệu]
+├─ Sự kiện hiện có: Đã lập chỉ mục ({$existingEventCount} bản ghi)
+├─ Cơ sở nhân vật: Đã lập bản đồ
+├─ Cơ sở tiến độ quỹ đạo: Đã ghi chú
+├─ Cơ sở dữ kiện: Đã tải
+└─ Cấu trúc đầu ra: ✓ Đã xác định trong <meta_protocol>
+Tất cả kiểm tra đã vượt qua. Bắt đầu trích xuất nội dung tăng dần...
 {
   "mindful_prelude":`;
 
-export const DEFAULT_SUMMARY_USER_CONFIRM_PROMPT = `怎么截断了！重新完整生成，只输出JSON，不要任何其他内容，3000字以内
+export const DEFAULT_SUMMARY_USER_CONFIRM_PROMPT = `Tại sao lại bị ngắt quãng! Hãy tạo lại toàn bộ hoàn chỉnh, CHỈ XUẤT RA JSON bằng TIẾNG VIỆT, không thêm bất kỳ văn bản nào khác, giới hạn trong 3000 chữ.
 </Chat_History>`;
 
-export const DEFAULT_SUMMARY_ASSISTANT_PREFILL_PROMPT = '下面重新生成完整JSON。';
+export const DEFAULT_SUMMARY_ASSISTANT_PREFILL_PROMPT = 'Dưới đây là mã JSON hoàn chỉnh được tạo lại.';
+
 export const BUILTIN_SUMMARY_PROMPTS = Object.freeze({
     summarySystemPrompt: DEFAULT_SUMMARY_SYSTEM_PROMPT,
     summaryAssistantDocPrompt: DEFAULT_SUMMARY_ASSISTANT_DOC_PROMPT,
