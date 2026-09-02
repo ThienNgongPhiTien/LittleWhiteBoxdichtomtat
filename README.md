@@ -5,3 +5,8 @@
 ## 许可证
 
 详见 `docs/LICENSE.md`
+
+Chỉnh sửa:
+modules/story-summary/data/config.js 
+modules/story-summary/story-summary.html
+modules/story-summary/story-summary-ui.js
