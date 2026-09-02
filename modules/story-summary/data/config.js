@@ -141,7 +141,7 @@ Quy tắc cốt lõi:
    - isState: true  -> Ràng buộc cốt lõi phải giữ ổn định và KHÔNG BAO GIỜ bị tự động xóa (danh tính, vị trí, sống/chết, sở hữu, tình trạng quan hệ, đặc điểm cơ thể nhận diện, quy tắc).
    - isState: false -> Dữ kiện không cốt lõi / ký ức mềm có thể bị xóa đi do giới hạn dung lượng.
 4) Dữ kiện quan hệ:
-   - Dùng định dạng vị ngữ: "đánh giá về X" (X là người được nhắm đến).
+   - BẮT BUỘC dùng định dạng vị ngữ nguyên bản tiếng Trung: "对X的看法" (X là người được nhắm đến).
    - Bắt buộc có 'trend' (xu hướng): Rạn nứt | Chán ghét | Ác cảm | Xa lạ | Hợp ý | Thân mật | Hòa quyện
 5) Thu hồi (Xóa):
    - Để xóa dữ kiện, xuất ra: {s, p, retracted: true}
@@ -196,7 +196,7 @@ Trước khi tạo, hãy quan sát NGƯỜI DÙNG và phân tích cẩn thận:
 - isState: true=核心约束(位置/身份/生死/关系/稳定辨识性身体特征)，false=有容量上限会被清理
 - 外貌类统一使用谓词 p="身体特征"；只记录稳定、有辨识度的特征，不记录临时衣着、姿势、表情和普通伤势
 - "身体特征" 的 o 必须写当前完整值。由于相同 s+p 会覆盖旧值，新增特征时必须把已有特征一并写全，不能只写新增部分
-- 关系类: p="对X的看法"，trend 必填（破裂|厌恶|反感|陌生|投缘|亲密|交融）
+- Dữ kiện quan hệ: Vị ngữ (p) BẮT BUỘC giữ nguyên tiếng Trung là "对X的看法" (thay X bằng tên nhân vật được nhắm đến), bắt buộc điền trend (Rạn nứt|Chán ghét|Ác cảm|Xa lạ|Hợp ý|Thân mật|Hòa quyện)
 - 删除: {s, p, retracted: true}，不需要 o 字段
 - 更新: {s, p, o, isState, trend?}
 - 谓词规范化: 复用已有谓词，不要发明同义词
@@ -236,7 +236,7 @@ Trước khi tạo, hãy quan sát NGƯỜI DÙNG và phân tích cẩn thận:
     {"name": "Tên nhân vật, không dùng đại từ, chỉ dùng tên chính thức", "trajectory": "Mô tả giai đoạn hiện tại", "progress": 0.0-1.0, "newMoment": "Khoảnh khắc quan trọng mới xuất hiện lần này"}
   ],
   "factUpdates": [
-    {"s": "Chủ thể", "p": "Vị ngữ", "o": "Giá trị hiện tại", "isState": true, "trend": "Chỉ điền cho mục quan hệ"},
+    {"s": "Chủ thể", "p": "对X的看法", "o": "Giá trị hiện tại", "isState": true, "trend": "Chỉ điền cho mục quan hệ"},
     {"s": "Chủ thể cần xóa", "p": "Vị ngữ cần xóa", "retracted": true}
   ],
   "characterAliasUpdates": [
