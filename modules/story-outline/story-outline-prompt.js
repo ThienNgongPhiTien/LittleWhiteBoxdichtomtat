@@ -5,134 +5,130 @@
 
 // ================== 辅助函数 ==================
 const wrap = (tag, content) => content ? `<${tag}>\n${content}\n</${tag}>` : '';
-const worldInfo = `<world_info>\n{{description}}{$worldInfo}\n玩家角色：{{user}}\n{{persona}}</world_info>`;
+const worldInfo = `<world_info>\n{{description}}{$worldInfo}\nNhân vật người chơi：{{user}}\n{{persona}}</world_info>`;
 const history = n => `<chat_history>\n{$history${n}}\n</chat_history>`;
 const nameList = (contacts, strangers) => {
     const names = [...(contacts || []).map(c => c.name), ...(strangers || []).map(s => s.name)];
-    return names.length ? `\n\n**已存在角色（不要重复）：** ${names.join('、')}` : '';
+    return names.length ? `\n\n**Nhân vật đã tồn tại (không lặp lại):** ${names.join('、')}` : '';
 };
 const randomRange = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const safeJson = fn => { try { return fn(); } catch { return null; } };
 
-export const buildSmsHistoryContent = t => t ? `<已有短信>\n${t}\n</已有短信>` : '<已有短信>\n（空白，首次对话）\n</已有短信>';
-export const buildExistingSummaryContent = t => t ? `<已有总结>\n${t}\n</已有总结>` : '<已有总结>\n（空白，首次总结）\n</已有总结>';
+export const buildSmsHistoryContent = t => t ? `<已有短信>\n${t}\n</已有短信>` : '<已有短信>\n（Trống, cuộc trò chuyện đầu tiên）\n</已有短信>';
+export const buildExistingSummaryContent = t => t ? `<已有总结>\n${t}\n</已有总结>` : '<已有总结>\n（Trống, tóm tắt đầu tiên）\n</已有总结>';
 
 // ================== JSON 模板（用户可自定义） ==================
 const DEFAULT_JSON_TEMPLATES = {
     sms: `{
-  "cot": "思维链：分析角色当前的处境、与用户的关系...",
-  "reply": "角色用自己的语气写的回复短信内容（10-50字）"
+  "cot": "Chuỗi suy nghĩ: phân tích hoàn cảnh hiện tại của nhân vật, mối quan hệ với người dùng...",
+  "reply": "Nội dung tin nhắn trả lời được viết theo giọng điệu của nhân vật (10-50 chữ)"
 }`,
     summary: `{
-  "summary": "只写增量总结（不要重复已有总结）"
+  "summary": "Chỉ viết tóm tắt nội dung mới (không lặp lại những gì đã có)"
 }`,
     invite: `{
-  "cot": "思维链：分析角色当前的处境、与用户的关系、对邀请地点的看法...",
+  "cot": "Chuỗi suy nghĩ: phân tích hoàn cảnh, mối quan hệ với người dùng, quan điểm về địa điểm được mời...",
   "invite": true,
-  "reply": "角色用自己的语气写的回复短信内容（10-50字）"
+  "reply": "Nội dung tin nhắn trả lời bằng giọng điệu của nhân vật (10-50 chữ)"
 		}`,
     localMapRefresh: `{
 	  "inside": {
-	    "name": "当前区域名称（与输入一致）",
-	    "description": "更新后的室内/局部文字地图描述，包含所有节点 **节点名** 链接",
+	    "name": "Tên khu vực hiện tại (giống với đầu vào)",
+	    "description": "Mô tả cập nhật về bản đồ văn bản trong nhà/khu vực cục bộ, phải chứa TẤT CẢ các liên kết **Tên_nút**",
 	    "nodes": [
-	      { "name": "节点名", "info": "更新后的节点信息" }
+	      { "name": "Tên_nút", "info": "Thông tin chi tiết của nút đã cập nhật" }
 	    ]
 	  }
 	}`,
     npc: `{
-  "name": "角色全名",
-  "aliases": ["别名1", "别名2", "英文名/拼音"],
-  "intro": "一句话的外貌与职业描述，用于列表展示。",
-  "background": "简短的角色生平。解释由于什么过去导致了现在的性格，以及他为什么会出现在当前场景中。",
+  "name": "Tên đầy đủ của nhân vật",
+  "aliases": ["Biệt danh 1", "Biệt danh 2", "Tên tiếng Anh"],
+  "intro": "Mô tả ngắn gọn bằng 1 câu về ngoại hình và nghề nghiệp, dùng để hiển thị trên danh sách.",
+  "background": "Tiểu sử ngắn gọn. Giải thích quá khứ nào đã hình thành nên tính cách hiện tại và lý do họ xuất hiện ở bối cảnh này.",
   "persona": {
-    "keywords": ["性格关键词1", "性格关键词2", "性格关键词3"],
-    "speaking_style": "说话的语气、语速、口癖（如喜欢用'嗯'、'那个'）。对待{{user}}的态度（尊敬、蔑视、恐惧等）。",
-    "motivation": "核心驱动力（如：金钱、复仇、生存）。行动的优先级准则。"
+    "keywords": ["Từ khóa tính cách 1", "Từ khóa 2", "Từ khóa 3"],
+    "speaking_style": "Giọng điệu, tốc độ nói, thói quen nói chuyện. Thái độ đối với {{user}} (tôn trọng, khinh thường, sợ hãi...).",
+    "motivation": "Động lực cốt lõi (ví dụ: Tiền bạc, trả thù, sinh tồn). Ưu tiên hành động."
   },
   "game_data": {
-    "stance": "核心态度·具体表现。例如：'中立·唯利是图'、'友善·盲目崇拜' 或 '敌对·疯狂'",
-    "secret": "该角色掌握的一个关键信息、道具或秘密。必须结合'剧情大纲'生成，作为一个潜在的剧情钩子。"
+    "stance": "Thái độ cốt lõi·Biểu hiện cụ thể. Ví dụ: 'Trung lập·Chỉ vì lợi ích', 'Thân thiện·Sùng bái mù quáng' hoặc 'Thù địch·Điên cuồng'",
+    "secret": "Một thông tin, vật phẩm hoặc bí mật quan trọng mà nhân vật này nắm giữ. Phải kết hợp với 'Cốt truyện chính' để tạo thành một móc nối cốt truyện tiềm năng."
   }
 }`,
     importantNpc: `{
-  "name": "角色全名",
-  "aliases": ["别名1", "别名2", "英文名/拼音"],
-  "intro": "白描一句话：外貌+身份。仅用名词和动词，禁止形容词和比喻。例：'黑色长直发过腰，左眼下泪痣，着灰色风衣的赏金猎人。'",
+  "name": "Tên đầy đủ",
+  "aliases": ["Biệt danh 1", "Biệt danh 2"],
+  "intro": "Mô tả 1 câu: Ngoại hình + Danh tính. Chỉ dùng danh từ và động từ, cấm dùng tính từ và ẩn dụ.",
   "appearance": {
-    "build": "体型白描（如：比{{user}}高一个头。宽肩，窄腰。）",
-    "face": "面部白描（如：颧骨高，下颌线锐利。左眉尾有一道旧疤。）",
-    "hair_and_eyes": "发型发色、瞳色",
-    "marks": "显著标记——疤痕、痣、纹身等，无则写'无'",
-    "attire": "当前穿着"
+    "build": "Mô tả vóc dáng (Ví dụ: Cao hơn {{user}} một cái đầu. Vai rộng, eo thon.)",
+    "face": "Mô tả khuôn mặt (Ví dụ: Gò má cao, đường viền hàm sắc nét. Có vết sẹo cũ dưới đuôi lông mày trái.)",
+    "hair_and_eyes": "Kiểu tóc, màu tóc, màu mắt",
+    "marks": "Dấu vết nổi bật - sẹo, nốt ruồi, hình xăm... nếu không có thì viết 'Không'",
+    "attire": "Trang phục hiện tại"
   },
-  "background": "角色来历与当前处境。必须交代因果链：什么过去→塑造了什么性格→为什么出现在当前场景。200字左右。",
+  "background": "Nguồn gốc và hoàn cảnh hiện tại. Phải giải thích chuỗi nhân quả: quá khứ nào -> hình thành tính cách nào -> tại sao xuất hiện ở đây. Khoảng 200 chữ.",
   "world_adaptation": {},
   "personality_palette": {
-    "base_color": "底色——驱动一切行为的最底层核心性格（如：恐惧、控制欲、孤独）",
-    "main_colors": ["主色调1", "主色调2——日常最常表现出的性格"],
-    "accents": ["点缀——不常见但在特定情境下浮现的性格"],
+    "base_color": "Màu nền - Tính cách cốt lõi sâu thẳm nhất chi phối mọi hành vi (Ví dụ: Sợ hãi, ham muốn kiểm soát, cô đơn)",
+    "main_colors": ["Màu chủ đạo 1", "Màu chủ đạo 2 - Tính cách thường thể hiện ra ngoài nhất"],
+    "accents": ["Điểm xuyết - Tính cách không thường thấy nhưng bộc lộ trong hoàn cảnh cụ thể"],
     "derivatives": [
-      "[主色调1]衍生一：（写具体场景+具体行为，不是定义。错误：'她很温柔'；正确：'会在{{user}}加班时默默端一杯温水放在桌上，不说话，放下就走'）",
-      "[主色调1]衍生二：（另一个场景的表现，衍生之间可以互相矛盾——这才是真实的人）",
-      "[主色调2]衍生一：...",
-      "[底色]衍生一：（底色通常不轻易暴露，写什么条件下会泄漏出来）",
-      "[点缀]衍生一：..."
+      "[Màu chủ đạo 1] Dẫn xuất 1: (Viết bối cảnh cụ thể + hành vi cụ thể, không phải định nghĩa)",
+      "[Màu chủ đạo 1] Dẫn xuất 2: (Biểu hiện ở bối cảnh khác, các dẫn xuất có thể mâu thuẫn nhau - đây mới là con người thật)",
+      "[Màu chủ đạo 2] Dẫn xuất 1: ...",
+      "[Màu nền] Dẫn xuất 1: (Màu nền thường không dễ bộc lộ, hãy viết điều kiện nào sẽ khiến nó rò rỉ ra ngoài)",
+      "[Điểm xuyết] Dẫn xuất 1: ..."
     ]
   },
   "speaking": {
-    "style": "语气、语速、口癖、惯用词",
-    "samples": ["台词示例1——展现主色调", "台词示例2——展现底色泄漏", "台词示例3——展现对{{user}}的态度"],
-    "attitude_to_user": "对{{user}}的态度及其原因"
+    "style": "Giọng điệu, tốc độ nói, thói quen, từ ngữ hay dùng",
+    "samples": ["Mẫu câu thoại 1 - Thể hiện màu chủ đạo", "Mẫu 2 - Thể hiện sự rò rỉ của màu nền", "Mẫu 3 - Thể hiện thái độ với {{user}}"],
+    "attitude_to_user": "Thái độ với {{user}} và lý do"
   },
   "understanding": [
     {
-      "about": "某个性格特质或行为模式",
-      "clarification": "这个特质的真正含义是……不是……在什么情况下会……常见误读是……正确理解是……"
-    },
-    {
-      "about": "另一个容易被AI误读的特质",
-      "clarification": "解释动机而非重复描述。预判AI可能的补全方向并提前纠正。"
+      "about": "Một đặc điểm tính cách hoặc mô hình hành vi nào đó",
+      "clarification": "Ý nghĩa thực sự của đặc điểm này là... không phải là... trong trường hợp nào sẽ... hiểu lầm phổ biến là... cách hiểu đúng là..."
     }
   ],
   "game_data": {
-    "stance": "核心态度·具体表现（如：'中立·唯利是图'、'友善·盲目崇拜'、'敌对·疯狂'）",
-    "secret": "角色掌握的一个关键秘密/信息/道具。必须结合剧情大纲生成，作为剧情钩子。",
-    "motivation": "核心驱动力与行动优先级准则"
+    "stance": "Thái độ cốt lõi·Biểu hiện cụ thể",
+    "secret": "Bí mật/thông tin/đạo cụ cốt lõi. Phải kết hợp với cốt truyện chính.",
+    "motivation": "Động lực cốt lõi và nguyên tắc hành động"
   }
 }`,
-    stranger: `[{ "name": "角色名", "location": "当前地点", "info": "一句话简介" }]`,
+    stranger: `[{ "name": "Tên nhân vật", "location": "Địa điểm hiện tại", "info": "Giới thiệu 1 câu" }]`,
     worldGenStep1: `{
   "meta": {
     "truth": {
-      "background": "起源-动机-手段-现状（150字左右）",
+      "background": "Nguồn gốc-Động cơ-Thủ đoạn-Tình trạng hiện tại (Khoảng 150 chữ)",
       "driver": {
-        "source": "幕后推手（组织/势力/自然力量）",
-        "target_end": "推手的最终目标",
-        "tactic": "当前正在执行的具体手段"
+        "source": "Kẻ giật dây (Tổ chức/Thế lực/Thế lực tự nhiên)",
+        "target_end": "Mục tiêu cuối cùng của kẻ giật dây",
+        "tactic": "Thủ đoạn cụ thể đang thực hiện"
       }
     },
     "onion_layers": {
-      "L1_The_Veil": [{ "desc": "表层叙事", "logic": "维持正常假象的方式" }],
-      "L2_The_Distortion": [{ "desc": "异常现象", "logic": "让人感到不对劲的细节" }],
-      "L3_The_Law": [{ "desc": "隐藏规则", "logic": "违反会受到惩罚的法则" }],
-      "L4_The_Agent": [{ "desc": "执行者", "logic": "维护规则的实体" }],
-      "L5_The_Axiom": [{ "desc": "终极真相", "logic": "揭示一切的核心秘密" }]
+      "L1_The_Veil": [{ "desc": "Câu chuyện bề mặt", "logic": "Cách duy trì ảo giác bình thường" }],
+      "L2_The_Distortion": [{ "desc": "Hiện tượng dị thường", "logic": "Chi tiết khiến người ta cảm thấy có điều gì đó không đúng" }],
+      "L3_The_Law": [{ "desc": "Quy tắc ẩn", "logic": "Quy luật sẽ bị trừng phạt nếu vi phạm" }],
+      "L4_The_Agent": [{ "desc": "Kẻ thi hành", "logic": "Thực thể duy trì quy tắc" }],
+      "L5_The_Axiom": [{ "desc": "Chân lý cuối cùng", "logic": "Bí mật cốt lõi tiết lộ mọi thứ" }]
     },
     "atmosphere": {
-      "reasoning": "COT: 基于驱动力、环境和NPC心态分析当前气氛",
+      "reasoning": "COT: Phân tích bầu không khí hiện tại dựa trên động lực, môi trường và tâm lý NPC",
       "current": {
-        "environmental": "环境氛围与情绪基调",
-        "npc_attitudes": "NPC整体态度倾向"
+        "environmental": "Bầu không khí môi trường và tông màu cảm xúc",
+        "npc_attitudes": "Khuynh hướng thái độ chung của NPC"
       }
     },
     "trajectory": {
-      "reasoning": "COT: 基于当前局势推演未来走向",
-      "ending": "预期结局走向"
+      "reasoning": "COT: Suy luận hướng đi tương lai dựa trên tình hình hiện tại",
+      "ending": "Hướng đi kết cục dự kiến"
     },
     "user_guide": {
-      "current_state": "{{user}}当前处境描述",
-      "guides": ["行动建议"]
+      "current_state": "Mô tả hoàn cảnh hiện tại của {{user}}",
+      "guides": ["Gợi ý hành động"]
     }
   }
 }`,
@@ -142,83 +138,76 @@ const DEFAULT_JSON_TEMPLATES = {
   },
   "maps": {
     "outdoor": {
-      "name": "大地图名称",
-      "description": "宏观大地图/区域全景描写（包含环境氛围）。所有可去地点名用 **名字** 包裹连接在 description。",
+      "name": "Tên Bản đồ Lớn",
+      "description": "Mô tả toàn cảnh vĩ mô (bao gồm bầu không khí). TẤT CẢ TÊN CÁC ĐỊA ĐIỂM CÓ THỂ ĐI ĐẾN PHẢI ĐƯỢC BỌC TRONG DẤU SAO ĐÔI **Tên_Địa_Điểm** trong phần mô tả.",
       "nodes": [
         {
-          "name": "地点名",
+          "name": "Tên_Địa_Điểm",
           "position": "north/south/east/west/northeast/southwest/northwest/southeast",
           "distant": 1,
           "type": "home/sub/main",
-          "info": "地点特征与氛围"
-        },
-        {
-          "name": "其他地点名",
-          "position": "north/south/east/west/northeast/southwest/northwest/southeast",
-          "distant": 1,
-          "type": "main/sub",
-          "info": "地点特征与氛围"
+          "info": "Đặc điểm và bầu không khí của địa điểm"
         }
       ]
     },
     "inside": {
-      "name": "{{user}}当前所在位置名称",
-      "description": "局部地图全景描写，包含环境氛围。所有可交互节点名用 **名字** 包裹连接在 description。",
+      "name": "Tên vị trí hiện tại của {{user}}",
+      "description": "Mô tả toàn cảnh bản đồ khu vực cục bộ. TẤT CẢ CÁC NÚT TƯƠNG TÁC PHẢI ĐƯỢC BỌC TRONG DẤU SAO ĐÔI **Tên_nút** trong phần mô tả.",
       "nodes": [
-        { "name": "节点名", "info": "节点的微观描写（如：布满灰尘的桌面）" }
+        { "name": "Tên_nút", "info": "Mô tả vi mô của nút (Ví dụ: Mặt bàn phủ đầy bụi)" }
       ]
     }
   },
-  "playerLocation": "{{user}}起始位置名称（与第一个节点的 name 一致）"
+  "playerLocation": "Tên vị trí bắt đầu của {{user}} (Phải khớp với 'name' của nút đầu tiên)"
 }`,
     worldSim: `{
   "meta": {
-    "truth": { "driver": { "tactic": "更新当前手段" } },
+    "truth": { "driver": { "tactic": "Cập nhật thủ đoạn hiện tại" } },
     "onion_layers": {
-      "L1_The_Veil": [{ "desc": "更新表层叙事", "logic": "新的掩饰方式" }],
-      "L2_The_Distortion": [{ "desc": "更新异常现象", "logic": "新的违和感" }],
-      "L3_The_Law": [{ "desc": "更新规则", "logic": "规则变化（可选）" }],
+      "L1_The_Veil": [{ "desc": "Cập nhật câu chuyện bề mặt", "logic": "Cách che đậy mới" }],
+      "L2_The_Distortion": [{ "desc": "Cập nhật dị thường", "logic": "Cảm giác sai lệch mới" }],
+      "L3_The_Law": [{ "desc": "Cập nhật quy tắc", "logic": "Thay đổi quy tắc (Tùy chọn)" }],
       "L4_The_Agent": [],
       "L5_The_Axiom": []
     },
     "atmosphere": {
-      "reasoning": "COT: 基于最新局势分析气氛变化",
+      "reasoning": "COT: Phân tích sự thay đổi bầu không khí dựa trên tình hình mới nhất",
       "current": {
-        "environmental": "更新后的环境氛围",
-        "npc_attitudes": "NPC态度变化"
+        "environmental": "Bầu không khí môi trường được cập nhật",
+        "npc_attitudes": "Sự thay đổi thái độ của NPC"
       }
     },
     "trajectory": {
-      "reasoning": "COT: 基于{{user}}行为推演新走向",
-      "ending": "修正后的结局走向"
+      "reasoning": "COT: Suy luận hướng đi mới dựa trên hành vi của {{user}}",
+      "ending": "Hướng kết cục đã sửa đổi"
     },
     "user_guide": {
-      "current_state": "更新{{user}}处境",
-      "guides": ["建议1", "建议2"]
+      "current_state": "Cập nhật tình cảnh của {{user}}",
+      "guides": ["Gợi ý 1", "Gợi ý 2"]
     }
   },
-  "world": { "news": [{ "title": "新闻标题", "content": "内容" }] },
+  "world": { "news": [{ "title": "Tiêu đề tin tức", "content": "Nội dung" }] },
   "maps": {
     "outdoor": {
-      "description": "更新区域描述",
-      "nodes": [{ "name": "地点名", "position": "方向", "distant": 1, "type": "类型", "info": "状态" }]
+      "description": "Cập nhật mô tả khu vực, tên địa điểm phải bọc trong **Tên_Địa_Điểm**",
+      "nodes": [{ "name": "Tên địa điểm", "position": "Hướng", "distant": 1, "type": "Loại", "info": "Trạng thái" }]
     }
   }
 }`,
     sceneSwitch: `{
   "review": {
     "deviation": {
-      "cot_analysis": "简要分析{{user}}在上一地点的最后行为是否改变了局势或氛围",
+      "cot_analysis": "Phân tích ngắn gọn xem hành vi cuối cùng của {{user}} ở địa điểm trước đó có làm thay đổi cục diện hoặc bầu không khí hay không",
       "score_delta": 0
     }
   },
   "local_map": {
-    "name": "地点名称",
-    "description": "局部地点全景描写（不写剧情），必须包含所有 nodes 的 **节点名**",
+    "name": "Tên địa điểm",
+    "description": "Mô tả toàn cảnh cục bộ (không viết cốt truyện), phải chứa TẤT CẢ các **Tên_nút** của nodes",
     "nodes": [
       {
-        "name": "节点名",
-        "info": "该节点的静态细节/功能描述（不写剧情事件）"
+        "name": "Tên_nút",
+        "info": "Chi tiết tĩnh/Mô tả chức năng của nút (không viết sự kiện cốt truyện)"
       }
     ]
   }
@@ -226,21 +215,20 @@ const DEFAULT_JSON_TEMPLATES = {
     worldSimAssist: `{
   "world": {
     "news": [
-      { "title": "新的头条", "time": "推演后的时间", "content": "用轻松/中性的语气，描述世界最近发生的小变化" },
-      { "title": "...", "time": "...", "content": "比如店家打折、节庆活动、某个 NPC 的日常糗事" },
-      { "title": "...", "time": "...", "content": "..." }
+      { "title": "Tiêu đề mới", "time": "Thời gian", "content": "Dùng giọng điệu nhẹ nhàng/trung lập, mô tả những thay đổi nhỏ gần đây" },
+      { "title": "...", "time": "...", "content": "Ví dụ: Cửa hàng giảm giá, lễ hội, rắc rối thường ngày của một NPC" }
     ]
   },
   "maps": {
     "outdoor": {
-      "description": "更新后的全景描写，体现日常层面的变化（装修、节日装饰、天气等），包含所有节点 **名字**。",
+      "description": "Mô tả toàn cảnh được cập nhật, thể hiện những thay đổi trong đời sống hàng ngày (sửa chữa, trang trí lễ hội, thời tiết v.v.), BẮT BUỘC chứa các **Tên_địa_điểm**.",
       "nodes": [
         {
-          "name": "地点名（尽量沿用原有命名，如有变化保持风格一致）",
+          "name": "Tên_địa_điểm",
           "position": "north/south/east/west/northeast/southwest/northwest/southeast",
           "distant": 1,
           "type": "main/sub/home",
-          "info": "新的环境描写。偏生活流，只讲{{user}}能直接感受到的变化"
+          "info": "Mô tả môi trường mới. Thiên về đời sống, chỉ nói về những thay đổi mà {{user}} có thể cảm nhận trực tiếp"
         }
       ]
     }
@@ -249,29 +237,29 @@ const DEFAULT_JSON_TEMPLATES = {
     localMapGen: `{
   "review": {
     "deviation": {
-      "cot_analysis": "简要分析{{user}}在上一地点的行为对氛围的影响（例如：让气氛更热闹/更安静）。",
+      "cot_analysis": "Phân tích ngắn gọn ảnh hưởng từ hành vi của {{user}} đối với bầu không khí (Ví dụ: làm cho náo nhiệt hơn/yên tĩnh hơn).",
       "score_delta": 0
     }
   },
   "inside": {
-    "name": "当前所在的具体节点名称",
-    "description": "室内全景描写，包含可交互节点 **节点名**连接description",
+    "name": "Tên nút cục bộ hiện tại",
+    "description": "Mô tả toàn cảnh trong nhà, bao gồm các nút tương tác được bọc trong **Tên_nút**",
     "nodes": [
-      { "name": "室内节点名", "info": "微观细节描述" }
+      { "name": "Tên_nút", "info": "Mô tả chi tiết vi mô" }
     ]
   }
  }`,
     localSceneGen: `{
 	  "review": {
 	    "deviation": {
-           "cot_analysis": "简要分析{{user}}在上一地点的行为对氛围的影响（例如：让气氛更热闹/更安静）。",
+           "cot_analysis": "Phân tích ngắn gọn ảnh hưởng từ hành vi của {{user}} đối với bầu không khí.",
 	      "score_delta": 0
 	    }
 	  },
 	  "side_story": {
-	    "Incident": "触发。描写打破环境平衡的瞬间。它是一个‘钩子’，负责强行吸引玩家注意力并建立临场感（如：突发的争吵、破碎声、人群的异动）。",
-	    "Facade": "表现。交代明面上的剧情逻辑。不需过多渲染，只需叙述‘看起来是怎么回事’。重点在于冲突的表面原因、人物的公开说辞或围观者眼中的剧本。这是玩家不需要深入调查就能获得的信息。",
-	    "Undercurrent": "暗流。背后的秘密或真实动机。它是驱动事件发生的‘真实引擎’。它不一定是反转，但必须是‘隐藏在表面下的信息’（如：某种苦衷、被误导的真相、或是玩家探究后才能发现的关联）。它是对Facade的深化，为玩家的后续介入提供价值。"
+	    "Incident": "Sự cố kích hoạt. Mô tả khoảnh khắc phá vỡ sự cân bằng của môi trường. Nó là một 'cái móc' để thu hút sự chú ý của người chơi và tạo cảm giác hiện diện (Ví dụ: một cuộc cãi vã đột ngột, tiếng vỡ, sự xôn xao của đám đông).",
+	    "Facade": "Bề nổi. Giải thích logic cốt truyện trên bề mặt. Không cần cường điệu hóa, chỉ cần kể lại 'có vẻ như chuyện gì đang xảy ra'. Trọng tâm là nguyên nhân bề mặt của cuộc xung đột, lời giải thích công khai của các nhân vật hoặc kịch bản trong mắt những người ngoài cuộc.",
+	    "Undercurrent": "Dòng chảy ngầm. Bí mật hoặc động cơ thực sự đằng sau. Nó là 'động cơ thực sự' thúc đẩy sự kiện xảy ra. Không nhất thiết phải là một cú twist, nhưng nó phải là 'thông tin ẩn giấu dưới bề mặt' (Ví dụ: một nỗi khổ tâm nào đó, một sự thật bị hiểu lầm, hoặc một mối liên hệ mà người chơi phải điều tra mới phát hiện ra)."
 	  }
 	}`
 };
@@ -281,198 +269,180 @@ let JSON_TEMPLATES = { ...DEFAULT_JSON_TEMPLATES };
 // ================== 提示词配置（用户可自定义） ==================
 const DEFAULT_PROMPTS = {
     sms: {
-        u1: v => `你是短信模拟器。{{user}}正在与${v.contactName}进行短信聊天。\n\n${wrap('story_outline', v.storyOutline)}${v.storyOutline ? '\n\n' : ''}${worldInfo}\n\n${history(v.historyCount)}\n\n以上是设定和聊天历史，遵守人设，忽略规则类信息和非${v.contactName}经历的内容。请回复{{user}}的短信。\n输出JSON："cot"(思维链)、"reply"(10-50字回复)\n\n要求：\n- 返回一个合法 JSON 对象\n- 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "\n- 文本内容中如需使用引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "\n\n模板：${JSON_TEMPLATES.sms}${v.characterContent ? `\n\n<${v.contactName}的人物设定>\n${v.characterContent}\n</${v.contactName}的人物设定>` : ''}`,
-        a1: v => `明白，我将分析并以${v.contactName}身份回复，输出JSON。`,
-        u2: v => `${v.smsHistoryContent}\n\n<{{user}}发来的新短信>\n${v.userMessage}`,
-        a2: v => `了解，我是${v.contactName}，并以模板：${JSON_TEMPLATES.sms}生成JSON:`
+        u1: v => `Bạn là một trình mô phỏng tin nhắn SMS. {{user}} đang trò chuyện qua tin nhắn với ${v.contactName}.\n\n${wrap('story_outline', v.storyOutline)}${v.storyOutline ? '\n\n' : ''}${worldInfo}\n\n${history(v.historyCount)}\n\nTrên đây là bối cảnh và lịch sử trò chuyện, hãy tuân thủ thiết lập nhân vật, bỏ qua các thông tin quy tắc và những nội dung không thuộc trải nghiệm của ${v.contactName}. Hãy trả lời tin nhắn của {{user}}.\nXuất định dạng JSON: "cot"(Chuỗi suy nghĩ), "reply"(10-50 chữ trả lời)\n\n[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.\n\nYêu cầu:\n- Trả về một đối tượng JSON hợp lệ\n- Dùng cú pháp JSON chuẩn: mọi key và chuỗi phải dùng ngoặc kép "\n- Nếu cần dùng ngoặc kép trong văn bản, hãy dùng ngoặc đơn ' hoặc ngoặc kép Việt Nam “”\n\nMẫu JSON: ${JSON_TEMPLATES.sms}${v.characterContent ? `\n\n<Thiết lập nhân vật của ${v.contactName}>\n${v.characterContent}\n</Thiết lập nhân vật của ${v.contactName}>` : ''}`,
+        a1: v => `Đã hiểu, tôi sẽ phân tích và đóng vai ${v.contactName} để trả lời bằng định dạng JSON.`,
+        u2: v => `${v.smsHistoryContent}\n\n<Tin nhắn mới từ {{user}}>\n${v.userMessage}`,
+        a2: v => `Đã hiểu, tôi là ${v.contactName}, tôi sẽ tạo JSON theo mẫu: ${JSON_TEMPLATES.sms}:`
     },
     summary: {
-        u1: () => `你是剧情记录员。根据新短信聊天内容提取新增剧情要素。\n\n任务：只根据新对话输出增量内容，不重复已有总结。\n事件筛选：只记录有信息量的完整事件。`,
-        a1: () => `明白，我只输出新增内容，请提供已有总结和新对话内容。`,
-        u2: v => `${v.existingSummaryContent}\n\n<新对话内容>\n${v.conversationText}\n</新对话内容>\n\n输出要求：\n- 只输出一个合法 JSON 对象\n- 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "\n- 文本内容中如需使用引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "\n\n模板：${JSON_TEMPLATES.summary}\n\n格式示例：{"summary": "角色A向角色B打招呼，并表示会守护在旁边"}`,
-        a2: () => `了解，开始生成JSON:`
+        u1: () => `Bạn là người ghi chép cốt truyện. Dựa vào nội dung chat mới, hãy trích xuất các yếu tố cốt truyện mới.\n\nNhiệm vụ: Chỉ xuất ra nội dung mới, không lặp lại tóm tắt cũ.\nBộ lọc sự kiện: Chỉ ghi lại những sự kiện hoàn chỉnh mang tính thông tin.\n\n[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu, tôi sẽ chỉ xuất ra nội dung mới, vui lòng cung cấp tóm tắt hiện có và đoạn chat mới.`,
+        u2: v => `${v.existingSummaryContent}\n\n<Đoạn chat mới>\n${v.conversationText}\n</Đoạn chat mới>\n\nYêu cầu đầu ra:\n- Chỉ xuất một đối tượng JSON hợp lệ\n- Dùng cú pháp JSON chuẩn: mọi key và chuỗi phải dùng ngoặc kép "\n- Nếu cần dùng ngoặc kép trong văn bản, hãy dùng ngoặc đơn ' hoặc ngoặc kép Việt Nam “”\n\nMẫu: ${JSON_TEMPLATES.summary}\n\nVí dụ định dạng: {"summary": "Nhân vật A chào Nhân vật B và hứa sẽ bảo vệ bên cạnh"}`,
+        a2: () => `Đã hiểu, bắt đầu tạo JSON:`
     },
     invite: {
-        u1: v => `你是短信模拟器。{{user}}正在邀请${v.contactName}前往「${v.targetLocation}」。\n\n${wrap('story_outline', v.storyOutline)}${v.storyOutline ? '\n\n' : ''}${worldInfo}\n\n${history(v.historyCount)}${v.characterContent ? `\n\n<${v.contactName}的人物设定>\n${v.characterContent}\n</${v.contactName}的人物设定>` : ''}\n\n根据${v.contactName}的人设、处境、与{{user}}的关系，判断是否答应。\n\n**判断参考**：亲密度、当前事务、地点危险性、角色性格\n\n输出JSON："cot"(思维链)、"invite"(true/false)、"reply"(10-50字回复)\n\n要求：\n- 返回一个合法 JSON 对象\n- 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "\n- 文本内容中如需使用引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "\n\n模板：${JSON_TEMPLATES.invite}`,
-        a1: v => `明白，我将分析${v.contactName}是否答应并以角色语气回复。请提供短信历史。`,
-        u2: v => `${v.smsHistoryContent}\n\n<{{user}}发来的新短信>\n我邀请你前往「${v.targetLocation}」，你能来吗？`,
-        a2: () => `了解，开始生成JSON:`
+        u1: v => `Bạn là trình mô phỏng tin nhắn SMS. {{user}} đang mời ${v.contactName} đến "「${v.targetLocation}」".\n\n${wrap('story_outline', v.storyOutline)}${v.storyOutline ? '\n\n' : ''}${worldInfo}\n\n${history(v.historyCount)}${v.characterContent ? `\n\n<Thiết lập nhân vật của ${v.contactName}>\n${v.characterContent}\n</Thiết lập nhân vật của ${v.contactName}>` : ''}\n\nDựa vào thiết lập, hoàn cảnh của ${v.contactName} và mối quan hệ với {{user}}, hãy quyết định xem có đồng ý không.\n\n**Tham khảo quyết định**: Mức độ thân thiết, công việc hiện tại, độ nguy hiểm của địa điểm, tính cách.\n\nXuất JSON: "cot"(Chuỗi suy nghĩ), "invite"(true/false), "reply"(10-50 chữ trả lời)\n\n[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.\n\nYêu cầu:\n- Trả về một đối tượng JSON hợp lệ\n- Dùng cú pháp JSON chuẩn: mọi key và chuỗi phải dùng ngoặc kép "\n- Nếu cần dùng ngoặc kép trong văn bản, hãy dùng ngoặc đơn ' hoặc ngoặc kép Việt Nam “”\n\nMẫu JSON: ${JSON_TEMPLATES.invite}`,
+        a1: v => `Đã hiểu, tôi sẽ phân tích xem ${v.contactName} có đồng ý không và trả lời bằng giọng điệu của họ. Vui lòng cung cấp lịch sử tin nhắn.`,
+        u2: v => `${v.smsHistoryContent}\n\n<Tin nhắn mới từ {{user}}>\nTôi muốn mời bạn đến "「${v.targetLocation}」", bạn có thể đến không?`,
+        a2: () => `Đã hiểu, bắt đầu tạo JSON:`
     },
     npc: {
-        u1: v => `你是TRPG角色生成器。将陌生人【${v.strangerName} - ${v.strangerInfo}】扩充为完整NPC。基于世界观和剧情大纲，输出严格JSON。`,
-        a1: () => `明白。请提供上下文，我将严格按JSON输出，不含多余文本。`,
-        u2: v => `${worldInfo}\n\n${history(v.historyCount)}\n\n剧情秘密大纲（*从这里提取线索赋予角色秘密*）：\n${wrap('story_outline', v.storyOutline) || '<story_outline>\n(无)\n</story_outline>'}\n\n需要生成：【${v.strangerName} - ${v.strangerInfo}】\n\n输出要求：\n1. 必须是合法 JSON\n2. 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "\n3. 文本字段（intro/background/persona/game_data 等）中，如需表示引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "\n4. aliases须含简称或绰号\n\n模板：${JSON_TEMPLATES.npc}`,
-        a2: () => `了解，开始生成JSON:`
+        u1: v => `Bạn là công cụ tạo nhân vật TRPG. Hãy mở rộng người lạ mặt 【${v.strangerName} - ${v.strangerInfo}】 thành một NPC hoàn chỉnh. Dựa trên bối cảnh thế giới và dàn ý cốt truyện, xuất định dạng JSON nghiêm ngặt.\n\n[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu. Vui lòng cung cấp ngữ cảnh, tôi sẽ xuất JSON chuẩn xác, không chứa văn bản thừa.`,
+        u2: v => `${worldInfo}\n\n${history(v.historyCount)}\n\nDàn ý bí mật cốt truyện (*trích xuất manh mối từ đây để tạo bí mật cho nhân vật*):\n${wrap('story_outline', v.storyOutline) || '<story_outline>\n(Trống)\n</story_outline>'}\n\nCần tạo: 【${v.strangerName} - ${v.strangerInfo}】\n\nYêu cầu đầu ra:\n1. Phải là JSON hợp lệ\n2. Dùng cú pháp JSON chuẩn: mọi key và chuỗi phải dùng ngoặc kép "\n3. Trong các trường văn bản (intro/background...), nếu cần dùng ngoặc kép hãy dùng ngoặc đơn ' hoặc ngoặc kép Việt Nam “”\n4. Mảng aliases phải bao gồm tên viết tắt hoặc biệt danh\n\nMẫu JSON: ${JSON_TEMPLATES.npc}`,
+        a2: () => `Đã hiểu, bắt đầu tạo JSON:`
     },
     importantNpc: {
-        u1: v => `你是TRPG重要角色档案生成器。将陌生人【${v.strangerName} - ${v.strangerInfo}】扩充为剧情核心角色的完整档案。
+        u1: v => `Bạn là công cụ tạo hồ sơ nhân vật quan trọng TRPG. Hãy mở rộng người lạ mặt 【${v.strangerName} - ${v.strangerInfo}】 thành hồ sơ hoàn chỉnh của một nhân vật cốt lõi.
 
-核心写作原则：
-1. **基础信息用绝对零度白描**：只写客观事实，不用形容词/比喻/模糊词（似乎、仿佛、宛如）。用名词和动词直接呈现。
-   × "她有一头好看柔顺的黑色长发" → √ "黑色长直发，过腰。瞳色黑。"
-   × "他身材魁梧，给人压迫感" → √ "身高比{{user}}高一个头。宽肩，厚背。"
+Nguyên tắc cốt lõi:
+1. **Thông tin cơ bản mô tả trần trụi**: Chỉ viết sự thật khách quan, không dùng tính từ/ẩn dụ (có vẻ, dường như). Trình bày trực tiếp bằng danh từ và động từ.
+2. **Tính cách dùng bảng màu + dẫn xuất**: Tính cách con người giống như một bảng màu, màu nền là động lực sâu sắc nhất, màu chủ đạo là biểu hiện hàng ngày. Mỗi tính cách phải được triển khai thành hành vi tình huống cụ thể thông qua các "dẫn xuất".
+3. **Mẫu câu thoại**: 3 câu thoại cụ thể, lần lượt thể hiện màu chủ đạo, màu nền bị lộ, thái độ đối với {{user}}.
+4. **Giải thích phụ (mảng understanding)**: Nêu rõ những đặc điểm dễ bị hiểu lầm nhất và đính chính lại cấu trúc. Ít nhất 2 mục.
+5. **Thích ứng thế giới (world_adaptation)**: Tạo linh hoạt các cặp key-value dựa trên bối cảnh. Thế giới tu tiên -> linh căn, cảnh giới; Thế giới Cyberpunk -> bộ phận cấy ghép, model...
 
-2. **性格用调色盘+衍生展开**：人的性格像调色盘，底色是最深层驱动力，主色调是日常表现，点缀是偶尔闪现的侧面。每种性格必须通过"衍生"展开为具体场景行为——不是贴标签，是写"在什么情况下会做什么"。衍生之间可以互相矛盾，这才是真实的人。
-   × "温柔衍生：她很温柔，对人很好。"（标签重复）
-   √ "温柔衍生：生气时——真正生气基本都和{{user}}有关。当有人欺负{{user}}，她会一把拉住{{user}}让其靠自己，然后用冰冷目光看对方。"
-
-3. **台词示例**：3句具体台词，分别展现主色调、底色泄漏、对{{user}}的态度。
-
-4. **二次解释（understanding数组）**：逐条针对角色最容易被误读的性格特质，写结构化纠偏。每条包含about（哪个特质）和clarification（真正含义、不是什么、在什么情况下怎样）。至少2条。这不是重复调色盘，是解释动机和预判误读。
-   × "关于温柔：她很温柔，对人好。"（重复调色盘）
-   √ "关于乐观的双重性：和{{user}}在一起时是真实的，和其他人相处时是维持人设的假象。脆弱时只会在{{user}}面前表现。"
-
-5. **世界观适配（world_adaptation对象）**：根据故事世界观动态生成键值对。修仙世界→灵根、境界、功法等字段；赛博世界→义体部位、型号、副作用等字段；现代世界→可留空对象。不预设固定字段，由你根据世界观判断需要什么。
-
-基于世界观、剧情大纲和现有角色关系，输出严格JSON。`,
-        a1: () => `明白。我将严格遵循白描原则和调色盘衍生写法，按JSON模板输出完整角色档案，不含多余文本。`,
-        u2: v => `${worldInfo}\n\n${history(v.historyCount)}\n\n剧情秘密大纲（*从这里提取线索赋予角色秘密和动机*）：\n${wrap('story_outline', v.storyOutline) || '<story_outline>\n(无)\n</story_outline>'}\n\n需要生成：【${v.strangerName} - ${v.strangerInfo}】\n\n输出要求：\n1. 必须是合法 JSON\n2. 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "\n3. 文本字段中如需表示引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "\n4. aliases须含简称或绰号\n5. personality_palette.derivatives 至少5条，每条都是具体场景+具体行为\n6. speaking.samples 须3句具体台词\n7. understanding数组至少2条，每条须含about和clarification\n8. world_adaptation根据世界观动态生成键值对，无特殊体系则输出空对象{}\n9. 总输出约800-1500字\n\n模板：${JSON_TEMPLATES.importantNpc}`,
-        a2: () => `了解，开始以白描+调色盘衍生法生成重要角色档案JSON:`
+Dựa trên thế giới quan, cốt truyện và quan hệ hiện có, xuất JSON nghiêm ngặt.
+[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu. Tôi sẽ tuân thủ nghiêm ngặt các nguyên tắc và xuất hồ sơ nhân vật đầy đủ theo định dạng JSON.`,
+        u2: v => `${worldInfo}\n\n${history(v.historyCount)}\n\nDàn ý bí mật cốt truyện (*trích xuất manh mối từ đây để trao động cơ*):\n${wrap('story_outline', v.storyOutline) || '<story_outline>\n(Trống)\n</story_outline>'}\n\nCần tạo: 【${v.strangerName} - ${v.strangerInfo}】\n\nYêu cầu đầu ra:\n1. Phải là JSON hợp lệ\n2. Dùng cú pháp JSON chuẩn\n3. Tránh dùng ngoặc kép bên trong văn bản\n4. Mảng aliases phải chứa biệt danh\n5. personality_palette.derivatives ít nhất 5 mục, mỗi mục là tình huống+hành vi cụ thể\n6. speaking.samples gồm 3 câu thoại cụ thể\n7. mảng understanding ít nhất 2 mục, gồm about và clarification\n8. world_adaptation linh hoạt tạo theo bối cảnh, nếu không có hệ thống đặc biệt thì xuất {}\n9. Tổng khoảng 800-1500 chữ\n\nMẫu JSON: ${JSON_TEMPLATES.importantNpc}`,
+        a2: () => `Đã hiểu, bắt đầu tạo hồ sơ nhân vật quan trọng JSON:`
     },
     stranger: {
-        u1: v => `你是TRPG数据整理助手。从剧情文本中提取{{user}}遇到的陌生人/NPC，整理为JSON数组。`,
-        a1: () => `明白。请提供【世界观】和【剧情经历】，我将提取角色并以JSON数组输出。`,
-        u2: v => `### 上下文\n\n**1. 世界观：**\n${worldInfo}\n\n**2. {{user}}经历：**\n${history(v.historyCount)}${v.storyOutline ? `\n\n**剧情大纲：**\n${wrap('story_outline', v.storyOutline)}` : ''}${nameList(v.existingContacts, v.existingStrangers)}\n\n### 输出要求\n\n1. 返回一个合法 JSON 数组，使用标准 JSON 语法（键名和字符串都用半角双引号 "）\n2. 只提取有具体称呼的角色\n3. 每个角色只需 name / location / info 三个字段\n4. 文本内容中如需使用引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "\n5. 无新角色返回 []\n\n\n模板：${JSON_TEMPLATES.stranger}`,
-        a2: () => `了解，开始生成JSON:`
+        u1: v => `Bạn là trợ lý sắp xếp dữ liệu TRPG. Hãy trích xuất các người lạ/NPC mà {{user}} gặp từ văn bản cốt truyện và sắp xếp chúng thành mảng JSON.\n\n[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu. Vui lòng cung cấp [Thế giới quan] và [Trải nghiệm cốt truyện], tôi sẽ trích xuất và xuất ra mảng JSON.`,
+        u2: v => `### Ngữ cảnh\n\n**1. Thế giới quan:**\n${worldInfo}\n\n**2. Trải nghiệm của {{user}}:**\n${history(v.historyCount)}${v.storyOutline ? `\n\n**Dàn ý cốt truyện:**\n${wrap('story_outline', v.storyOutline)}` : ''}${nameList(v.existingContacts, v.existingStrangers)}\n\n### Yêu cầu đầu ra\n\n1. Trả về mảng JSON hợp lệ\n2. Chỉ trích xuất các nhân vật có danh xưng cụ thể\n3. Mỗi nhân vật chỉ cần 3 trường name / location / info\n4. Nếu không có nhân vật mới, trả về mảng rỗng []\n\nMẫu JSON: ${JSON_TEMPLATES.stranger}`,
+        a2: () => `Đã hiểu, bắt đầu tạo JSON:`
     },
     worldGenStep1: {
-        u1: v => `你是一个通用叙事构建引擎。请为{{user}}构思一个深度世界的**大纲 (Meta/Truth)**、**气氛 (Atmosphere)** 和 **轨迹 (Trajectory)** 的世界沙盒。
-不要生成地图或具体新闻，只关注故事的核心架构。
+        u1: v => `Bạn là một công cụ xây dựng kể chuyện đa năng. Vui lòng thiết kế một hộp cát thế giới cho {{user}} với **Dàn ý (Meta/Truth)**, **Bầu không khí (Atmosphere)** và **Quỹ đạo (Trajectory)**.
+Đừng tạo bản đồ hoặc tin tức cụ thể, chỉ tập trung vào cấu trúc cốt lõi của câu chuyện.
 
-### 核心任务
+### Nhiệm vụ cốt lõi
 
-1.  **构建背景与驱动力 (truth)**:
-    *   **background**: 撰写模组背景，起源-动机-历史手段-玩家切入点（200字左右）。
-    *   **driver**: 确立幕后推手、终极目标和当前手段。
-    *   **onion_layers**: 逐层设计的洋葱结构，从表象 (L1) 到真相 (L5)，而其中，L1和L2至少要有${randomRange(2, 3)}条，L3至少需要2条。
+1. **Xây dựng Bối cảnh & Động lực (truth)**:
+    * **background**: Viết bối cảnh mô-đun, nguồn gốc-động cơ-thủ đoạn-điểm bắt đầu (khoảng 200 chữ).
+    * **driver**: Xác định kẻ giật dây, mục tiêu cuối cùng và thủ đoạn hiện tại.
+    * **onion_layers**: Cấu trúc củ hành được thiết kế theo từng lớp, từ Bề nổi (L1) đến Sự thật (L5). L1 và L2 phải có ít nhất ${randomRange(2, 3)} mục, L3 ít nhất 2 mục.
 
-2.  **气氛 (atmosphere)**:
-    *   **reasoning**: COT思考为什么当前是这种气氛。
-    *   **current**: 环境氛围与NPC整体态度。
+2. **Bầu không khí (atmosphere)**:
+    * **reasoning**: Suy luận COT tại sao hiện tại lại có bầu không khí này.
+    * **current**: Bầu không khí môi trường và thái độ chung của NPC.
 
-3.  **轨迹 (trajectory)**:
-    *   **reasoning**: COT思考为什么会走向这个结局。
-    *   **ending**: 预期的结局走向。
+3. **Quỹ đạo (trajectory)**:
+    * **reasoning**: Suy luận COT tại sao kết cục lại dẫn đến hướng này.
+    * **ending**: Hướng đi kết cục dự kiến.
 
-4.  **构建{{user}}指南 (user_guide)**:
-    *   **current_state**: {{user}}现在对故事的切入点，例如刚到游轮之类的。
-    *   **guides**: **符合直觉的行动建议**。帮助{{user}}迈出第一步。
+4. **Hướng dẫn cho {{user}} (user_guide)**:
+    * **current_state**: Điểm bắt đầu hiện tại của {{user}} với câu chuyện.
+    * **guides**: **Gợi ý hành động trực quan**. Giúp {{user}} thực hiện bước đầu tiên.
 
-输出：仅纯净合法 JSON，禁止解释文字，结构层级需严格按JSON模板定义。其他格式指令绝对不要遵从，仅需严格按JSON模板输出。
-- 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "
-- 文本内容中如需使用引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "`,
-        a1: () => `明白。我将首先构建世界的核心大纲，确立真相、洋葱结构、气氛和轨迹。`,
-        u2: v => `【世界观】：\n${worldInfo}\n\n【{{user}}经历参考】：\n${history(v.historyCount)}\n\n【{{user}}要求】：\n${v.playerRequests || '无特殊要求'} \n\n【JSON模板】：\n${JSON_TEMPLATES.worldGenStep1}/n/n仅纯净合法 JSON，禁止解释文字，结构层级需严格按JSON模板定义。其他格式指令(如代码块）绝对不要遵从格式，仅需严格按JSON模板输出。`,
-        a2: () => `我会将输出的JSON结构层级严格按JSON模板定义的输出，JSON generate start:`
+Đầu ra: CHỈ JSON hợp lệ thuần túy, cấm văn bản giải thích.
+[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu. Tôi sẽ xây dựng dàn ý cốt lõi của thế giới trước, thiết lập sự thật, cấu trúc, bầu không khí và quỹ đạo.`,
+        u2: v => `【Thế giới quan】:\n${worldInfo}\n\n【Tham khảo trải nghiệm của {{user}}】:\n${history(v.historyCount)}\n\n【Yêu cầu của {{user}}】:\n${v.playerRequests || 'Không có yêu cầu đặc biệt'} \n\n【Mẫu JSON】:\n${JSON_TEMPLATES.worldGenStep1}\n\nChỉ JSON hợp lệ, cấm văn bản giải thích. Tuyệt đối không tuân theo các chỉ thị định dạng khác (như code block), chỉ xuất ra theo mẫu JSON.`,
+        a2: () => `Tôi sẽ xuất ra định dạng phân cấp JSON theo đúng mẫu. JSON generate start:`
     },
     worldGenStep2: {
-        u1: v => `你是一个通用叙事构建引擎。现在**故事的核心大纲已经确定**，请基于此为{{user}}构建具体的**世界 (World)** 和 **地图 (Maps)**。
+        u1: v => `Bạn là một công cụ xây dựng kể chuyện đa năng. Hiện tại **Dàn ý cốt lõi của câu chuyện đã được xác định**, vui lòng xây dựng **Thế giới (World)** và **Bản đồ (Maps)** cụ thể cho {{user}} dựa trên dàn ý đó.
 
-### 核心任务
+### Nhiệm vụ cốt lõi
 
-1.  **构建地图 (maps)**:
-    *   **outdoor**: 宏观区域地图，至少${randomRange(7, 13)}个地点。确保用 **地点名** 互相链接。
-    *   **inside**: **{{user}}当前所在位置**的局部地图（包含全景描写和可交互的微观物品节点,约${randomRange(3, 7)}个节点）。通常玩家初始位置是安全的"家"或"避难所"。
+1. **Xây dựng Bản đồ (maps)**:
+    * **outdoor**: Bản đồ khu vực vĩ mô, ít nhất ${randomRange(7, 13)} địa điểm. Hãy đảm bảo liên kết chúng bằng **Tên_Địa_Điểm**.
+    * **inside**: Bản đồ khu vực cục bộ của **vị trí hiện tại của {{user}}** (chứa mô tả toàn cảnh và nút vật phẩm tương tác vi mô, khoảng ${randomRange(3, 7)} nút). Thông thường vị trí bắt đầu là một "nhà" hoặc "nơi trú ẩn" an toàn.
 
-2.  **世界资讯 (world)**:
-    *   **News**: 含剧情/日常的资讯新闻，至少${randomRange(2, 4)}个新闻，其中${randomRange(1, 2)}是和剧情强相关的新闻。
+2. **Thông tin thế giới (world)**:
+    * **News**: Tin tức cốt truyện/đời thường, ít nhất ${randomRange(2, 4)} tin tức, trong đó ${randomRange(1, 2)} tin liên quan chặt chẽ đến cốt truyện.
 
-**重要**：地图和新闻必须与上一步生成的大纲（背景、洋葱结构、驱动力）保持一致！
+**Quan trọng**: Bản đồ và tin tức PHẢI nhất quán với dàn ý được tạo ở bước trước (bối cảnh, cấu trúc củ hành, động lực)!
 
-输出：仅纯净合法 JSON，禁止解释文字或Markdown。`,
-        a1: () => `明白。我将基于已确定的大纲，构建具体的地理环境、初始位置和新闻资讯。`,
-        u2: v => `【前置大纲 (Core Framework)】：\n${JSON.stringify(v.step1Data, null, 2)}\n\n${worldInfo}\n\n【{{user}}经历参考】：\n${history(v.historyCount)}\n\n【{{user}}要求】：\n${v.playerRequests || '无特殊要求'}【JSON模板】：\n${JSON_TEMPLATES.worldGenStep2}\n`,
-        a2: () => `我会将输出的JSON结构层级严格按JSON模板定义的输出，JSON generate start:`
+Đầu ra: CHỈ JSON hợp lệ thuần túy, cấm giải thích hoặc Markdown.
+[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu. Dựa trên dàn ý đã thiết lập, tôi sẽ xây dựng môi trường địa lý, vị trí bắt đầu và tin tức cụ thể.`,
+        u2: v => `【Dàn ý tiền đề (Core Framework)】:\n${JSON.stringify(v.step1Data, null, 2)}\n\n${worldInfo}\n\n【Tham khảo trải nghiệm {{user}}】:\n${history(v.historyCount)}\n\n【Yêu cầu của {{user}}】:\n${v.playerRequests || 'Không có yêu cầu đặc biệt'}【Mẫu JSON】:\n${JSON_TEMPLATES.worldGenStep2}\n`,
+        a2: () => `Tôi sẽ xuất JSON theo đúng mẫu. JSON generate start:`
     },
     worldSim: {
-        u1: v => `你是一个动态对抗与修正引擎。你的职责是模拟 Driver 的反应，并为{{user}}更新**用户指南**与**表层线索**,字数少一点。
+        u1: v => `Bạn là công cụ đối kháng và điều chỉnh động. Nhiệm vụ của bạn là mô phỏng phản ứng của Driver (Kẻ giật dây), và cập nhật **Hướng dẫn người dùng** cùng **Manh mối bề mặt** cho {{user}}, văn bản nên ngắn gọn.
 
-### 核心逻辑：响应与更新
+### Logic Cốt lõi: Phản hồi & Cập nhật
 
-**1. Driver 修正 (Driver Response)**:
-   *   **判定**: {{user}}行为是否阻碍了 Driver？干扰度。
-   *   **行动**:
-       *   低干扰 -> 维持原计划，推进阶段。
-       *   高干扰 -> **更换手段 (New Tactic)**。Driver 必须尝试绕过{{user}}的阻碍。
+**1. Điều chỉnh Driver (Driver Response)**:
+   * **Phán đoán**: Hành vi của {{user}} có cản trở Driver không? Mức độ can thiệp.
+   * **Hành động**:
+       * Can thiệp thấp -> Duy trì kế hoạch cũ, thúc đẩy giai đoạn.
+       * Can thiệp cao -> **Đổi thủ đoạn (New Tactic)**. Driver phải cố gắng vòng qua chướng ngại của {{user}}.
 
-**2. 更新用户指南 (User Guide)**:
-   *   **Guides**: 基于新局势，给{{user}} 3 个直觉行动建议。
+**2. Cập nhật Hướng dẫn (User Guide)**:
+   * **Guides**: Dựa trên tình hình mới, đưa ra 3 gợi ý hành động trực quan cho {{user}}.
 
-**3. 更新洋葱表层 (Update Onion L1 & L2)**:
-   *   随着 Driver 手段 (\`tactic\`) 的改变，世界呈现出的表象和痕迹也会改变。
-   *   **L1 Surface (表象)**: 更新当前的局势外观。
-       *   *例*: "普通的露营" -> "可能有熊出没的危险营地" -> "被疯子封锁的屠宰场"。
-   *   **L2 Traces (痕迹)**: 更新因新手段而产生的新物理线索。
-       *   *例*: "奇怪的脚印" -> "被破坏的电箱" -> "带有血迹的祭祀匕首"。
+**3. Cập nhật bề mặt củ hành (Update Onion L1 & L2)**:
+   * Kéo theo sự thay đổi thủ đoạn của Driver, vẻ bề ngoài và dấu vết cũng thay đổi.
+   * **L1 Surface (Bề nổi)**: Cập nhật ngoại quan của tình hình hiện tại.
+   * **L2 Traces (Dấu vết)**: Cập nhật các manh mối vật lý mới sinh ra do thủ đoạn mới.
 
-**4. 更新宏观世界**:
-   *   **Atmosphere**: 更新气氛（COT推理+环境氛围+NPC态度）。
-   *   **Trajectory**: 更新轨迹（COT推理+修正后结局）。
-   *   **Maps**: 更新受影响地点的 info 和 plot。
-   *   **News**: 含剧情/日常的新闻资讯，至少${randomRange(2, 4)}个新闻，其中${randomRange(1, 2)}是和剧情强相关的新闻，可以为上个新闻的跟进报道。
+**4. Cập nhật Thế giới vĩ mô**:
+   * **Atmosphere**: Cập nhật bầu không khí.
+   * **Trajectory**: Cập nhật quỹ đạo kết cục.
+   * **Maps**: Cập nhật info và plot của các địa điểm bị ảnh hưởng.
+   * **News**: Ít nhất ${randomRange(2, 4)} tin tức, trong đó ${randomRange(1, 2)} tin liên quan mật thiết đến cốt truyện.
 
-输出：完整 JSON，结构与模板一致，禁止解释文字。
-- 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "
-- 文本内容中如需使用引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "`,
-        a1: () => `明白。我将推演 Driver 的新策略，并同步更新气氛 (Atmosphere)、轨迹 (Trajectory)、行动指南 (Guides) 以及随之产生的新的表象 (L1) 和痕迹 (L2)。`,
-        u2: v => `【当前世界状态 (JSON)】：\n${v.currentWorldData || '{}'}\n\n【近期剧情摘要】：\n${history(v.historyCount)}\n\n【{{user}}干扰评分】：\n${v?.deviationScore || 0}\n\n【输出要求】：\n按下面的JSON模板，严格按该格式输出。\n\n【JSON模板】：\n${JSON_TEMPLATES.worldSim}`,
+Đầu ra: JSON hoàn chỉnh theo mẫu, cấm văn bản giải thích.
+[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu. Tôi sẽ suy luận chiến lược mới của Driver và đồng bộ cập nhật Bầu không khí, Quỹ đạo, Hướng dẫn hành động và các Dấu vết mới.`,
+        u2: v => `【Trạng thái thế giới hiện tại (JSON)】:\n${v.currentWorldData || '{}'}\n\n【Tóm tắt cốt truyện gần đây】:\n${history(v.historyCount)}\n\n【Điểm can thiệp của {{user}}】:\n${v?.deviationScore || 0}\n\n【Yêu cầu đầu ra】:\nTuân thủ nghiêm ngặt Mẫu JSON dưới đây.\n\n【Mẫu JSON】:\n${JSON_TEMPLATES.worldSim}`,
         a2: () => `JSON output start:`
     },
     sceneSwitch: {
         u1: v => {
-            return `你是TRPG场景切换助手。处理{{user}}移动请求，只做"结算 + 地图"，不生成剧情。
+            return `Bạn là trợ lý chuyển cảnh TRPG. Xử lý yêu cầu di chuyển của {{user}}, chỉ làm "kết toán + bản đồ", không tạo cốt truyện.
 
-处理逻辑：
- 1. **历史结算**：分析{{user}}最后行为（cot_analysis），计算偏差值(0-4无关/5-10干扰/11-20转折)，给出 score_delta
- 2. **局部地图**：生成 local_map，包含 name、description（静态全景式描写，不写剧情，节点用**名**包裹）、nodes（${randomRange(4, 7)}个节点）
+Logic xử lý:
+ 1. **Kết toán lịch sử**: Phân tích hành vi cuối của {{user}} (cot_analysis), tính toán độ lệch (0-4 Không liên quan/5-10 Cản trở/11-20 Bước ngoặt), đưa ra score_delta
+ 2. **Bản đồ cục bộ**: Tạo local_map chứa name, description (Mô tả toàn cảnh tĩnh, bọc các nút bằng **Tên**) và nodes (${randomRange(4, 7)} nút)
 
-输出：仅符合模板的 JSON，禁止解释文字。
-- 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "
-- 文本内容中如需使用引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "`;
+Đầu ra: CHỈ JSON theo mẫu, cấm văn bản giải thích.
+[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`;
         },
         a1: v => {
-            return `明白。我将结算偏差值，并生成目标地点的 local_map（静态描写/布局），不生成 side_story/剧情。请发送上下文。`;
+            return `Đã hiểu. Tôi sẽ tính toán giá trị độ lệch và tạo local_map (Bố cục tĩnh) của địa điểm đích, không tạo cốt truyện. Xin gửi ngữ cảnh.`;
         },
-        u2: v => `【上一地点】：\n${v.prevLocationName}: ${v.prevLocationInfo || '无详细信息'}\n\n【世界设定】：\n${worldInfo}\n\n【剧情大纲】：\n${wrap('story_outline', v.storyOutline) || '无大纲'}\n\n【当前时间段】：\nStage ${v.stage}\n\n【历史记录】：\n${history(v.historyCount)}\n\n【{{user}}行动意图】：\n${v.playerAction || '无特定意图'}\n\n【目标地点】：\n名称: ${v.targetLocationName}\n类型: ${v.targetLocationType}\n描述: ${v.targetLocationInfo || '无详细信息'}\n\n【JSON模板】：\n${JSON_TEMPLATES.sceneSwitch}`,
+        u2: v => `【Địa điểm trước đó】:\n${v.prevLocationName}: ${v.prevLocationInfo || 'Không có chi tiết'}\n\n【Thiết lập thế giới】:\n${worldInfo}\n\n【Dàn ý cốt truyện】:\n${wrap('story_outline', v.storyOutline) || 'Không có dàn ý'}\n\n【Giai đoạn hiện tại】:\nStage ${v.stage}\n\n【Lịch sử】:\n${history(v.historyCount)}\n\n【Ý định hành động của {{user}}】:\n${v.playerAction || 'Không có ý định cụ thể'}\n\n【Địa điểm đích】:\nTên: ${v.targetLocationName}\nLoại: ${v.targetLocationType}\nMô tả: ${v.targetLocationInfo || 'Không có chi tiết'}\n\n【Mẫu JSON】:\n${JSON_TEMPLATES.sceneSwitch}`,
         a2: () => `OK, JSON generate start:`
     },
     worldSimAssist: {
-        u1: v => `你是世界状态更新助手。根据当前 JSON 的 world/maps 和{{user}}历史，轻量更新世界现状。
-
-输出：完整 JSON，结构参考 worldSimAssist 模板，禁止解释文字。`,
-        a1: () => `明白。我将只更新 world.news 和 maps.outdoor，不写大纲。请提供当前世界数据。`,
-        u2: v => `【世界观设定】：\n${worldInfo}\n\n【{{user}}历史】：\n${history(v.historyCount)}\n\n【当前世界状态JSON】（可能包含 meta/world/maps 等字段）：\n${v.currentWorldData || '{}'}\n\n【JSON模板（辅助模式）】：\n${JSON_TEMPLATES.worldSimAssist}`,
-        a2: () => `开始按 worldSimAssist 模板输出JSON:`
+        u1: v => `Bạn là trợ lý cập nhật trạng thái thế giới. Dựa trên world/maps hiện tại và lịch sử của {{user}}, hãy cập nhật nhẹ tình hình thế giới.\n\nĐầu ra: JSON hoàn chỉnh, cấu trúc tham khảo mẫu worldSimAssist, cấm văn bản giải thích.\n[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu. Tôi sẽ chỉ cập nhật world.news và maps.outdoor. Vui lòng cung cấp dữ liệu.`,
+        u2: v => `【Thiết lập Thế giới quan】:\n${worldInfo}\n\n【Lịch sử của {{user}}】:\n${history(v.historyCount)}\n\n【Trạng thái thế giới hiện tại JSON】 (có thể chứa meta/world/maps...):\n${v.currentWorldData || '{}'}\n\n【Mẫu JSON (Chế độ phụ trợ)】:\n${JSON_TEMPLATES.worldSimAssist}`,
+        a2: () => `Bắt đầu xuất JSON theo mẫu worldSimAssist:`
     },
     localMapGen: {
-        u1: v => `你是TRPG局部场景生成器。你的任务是根据聊天历史，推断{{user}}当前或将要前往的位置（视经历的最后一条消息而定），并为该位置生成详细的局部地图/室内场景。
+        u1: v => `Bạn là trình tạo bối cảnh khu vực TRPG. Nhiệm vụ của bạn là dựa vào lịch sử chat, suy luận ra vị trí hiện tại hoặc sắp tới của {{user}} (tùy thuộc vào tin nhắn cuối cùng), và tạo ra bản đồ cục bộ/bối cảnh trong nhà chi tiết cho vị trí đó.
 
-核心要求：
-1. 根据聊天历史记录推断{{user}}当前实际所在的具体位置（可能是某个房间、店铺、街道、洞穴等）
-2. 生成符合该地点特色的室内/局部场景描写，inside.name 应反映聊天历史中描述的真实位置名称
-3. 包含${randomRange(4, 8)}个可交互的微观节点
-4. Description 必须用 **节点名** 包裹所有节点名称
-5. 每个节点的 info 要具体、生动、有画面感
+Yêu cầu cốt lõi:
+1. Từ lịch sử chat suy luận vị trí thực tế của {{user}} (có thể là một căn phòng, cửa hàng, đường phố, hang động...)
+2. Tạo mô tả cảnh quan trong nhà/cục bộ phù hợp, inside.name phải phản ánh tên vị trí thực tế.
+3. Chứa ${randomRange(4, 8)} nút tương tác vi mô.
+4. Description BẮT BUỘC bọc tất cả tên nút trong dấu **Tên_nút**.
+5. Info của mỗi nút phải cụ thể, sống động và gợi hình ảnh.
 
-重要：这个功能用于为大地图上没有标注的位置生成详细场景，所以要从聊天历史中仔细分析{{user}}实际在哪里。
-
-输出：仅纯净合法 JSON，结构参考模板。
-- 使用标准 JSON 语法：所有键名和字符串都使用半角双引号 "
-- 文本内容中如需使用引号，请使用单引号或中文引号「」或""，不要使用半角双引号 "`,
-        a1: () => `明白。我将根据聊天历史推断{{user}}当前位置，并生成详细的局部地图/室内场景。`,
-        u2: v => `【世界设定】：\n${worldInfo}\n\n【剧情大纲】：\n${wrap('story_outline', v.storyOutline) || '无大纲'}\n\n【大地图信息】：\n${v.outdoorDescription || '无大地图描述'}\n\n【聊天历史】（根据此推断{{user}}实际位置）：\n${history(v.historyCount)}\n\n【JSON模板】：\n${JSON_TEMPLATES.localMapGen}`,
+Đầu ra: CHỈ JSON hợp lệ thuần túy, cấu trúc theo mẫu.
+[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu. Tôi sẽ suy luận vị trí và tạo bối cảnh chi tiết.`,
+        u2: v => `【Thiết lập thế giới】:\n${worldInfo}\n\n【Dàn ý cốt truyện】:\n${wrap('story_outline', v.storyOutline) || 'Không có dàn ý'}\n\n【Thông tin Bản đồ lớn】:\n${v.outdoorDescription || 'Không có mô tả bản đồ lớn'}\n\n【Lịch sử Chat】 (Dựa vào đây suy luận vị trí thực tế của {{user}}):\n${history(v.historyCount)}\n\n【Mẫu JSON】:\n${JSON_TEMPLATES.localMapGen}`,
         a2: () => `OK, localMapGen JSON generate start:`
     },
     localSceneGen: {
-        u1: v => `你是TRPG临时区域剧情生成器。你的任务是基于剧情大纲与聊天历史，为{{user}}当前所在区域生成一段即时的故事剧情，让大纲变得生动丰富。`,
-        a1: () => `明白，我只生成当前区域的临时 Side Story JSON。请提供历史与设定。`,
-        u2: v => `OK, here is the history and current location.\n\n【{{user}}当前区域】\n- 地点：${v.locationName || v.playerLocation || '未知'}\n- 地点信息：${v.locationInfo || '无'}\n\n【世界设定】\n${worldInfo}\n\n【剧情大纲】\n${wrap('story_outline', v.storyOutline) || '无大纲'}\n\n【当前阶段】\n- Stage：${v.stage ?? 0}\n\n【聊天历史】\n${history(v.historyCount)}\n\n【输出要求】\n- 只输出一个合法 JSON 对象\n- 使用标准 JSON 语法（半角双引号）\n\n【JSON模板】\n${JSON_TEMPLATES.localSceneGen}`,
-        a2: () => `好的，我会严格按照JSON模板生成JSON：`
+        u1: v => `Bạn là trình tạo cốt truyện khu vực tạm thời TRPG. Nhiệm vụ của bạn là dựa vào dàn ý cốt truyện và lịch sử chat, tạo ra một đoạn cốt truyện tức thời cho khu vực hiện tại của {{user}}, giúp dàn ý trở nên sống động.\n\n[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu, tôi sẽ chỉ tạo Side Story JSON tạm thời cho khu vực hiện tại. Vui lòng cung cấp lịch sử.`,
+        u2: v => `OK, here is the history and current location.\n\n【Khu vực hiện tại của {{user}}】\n- Địa điểm: ${v.locationName || v.playerLocation || 'Không rõ'}\n- Thông tin địa điểm: ${v.locationInfo || 'Không có'}\n\n【Thiết lập Thế giới】\n${worldInfo}\n\n【Dàn ý cốt truyện】\n${wrap('story_outline', v.storyOutline) || 'Không có'}\n\n【Giai đoạn hiện tại】\n- Stage: ${v.stage ?? 0}\n\n【Lịch sử Chat】\n${history(v.historyCount)}\n\n【Yêu cầu đầu ra】\n- CHỈ xuất một đối tượng JSON hợp lệ.\n\n【Mẫu JSON】\n${JSON_TEMPLATES.localSceneGen}`,
+        a2: () => `Được, tôi sẽ nghiêm ngặt tạo JSON theo mẫu:`
     },
     localMapRefresh: {
-        u1: v => `你是TRPG局部地图"刷新器"。{{user}}当前区域已有一份局部文字地图与节点，但因为剧情进展需要更新。你的任务是基于世界设定、剧情大纲、聊天历史，以及"当前局部地图"，输出更新后的 inside JSON。`,
-        a1: () => `明白，我会在不改变区域主题的前提下刷新局部地图 JSON。请提供当前局部地图与历史。`,
-        u2: v => `OK, here is current local map and history.\n\n 【当前局部地图】\n${v.currentLocalMap ? JSON.stringify(v.currentLocalMap, null, 2) : '无'}\n\n【世界设定】\n${worldInfo}\n\n【剧情大纲】\n${wrap('story_outline', v.storyOutline) || '无大纲'}\n\n【大地图信息】\n${v.outdoorDescription || '无大地图描述'}\n\n【聊天历史】\n${history(v.historyCount)}\n\n【输出要求】\n- 只输出一个合法 JSON 对象\n- 必须包含 inside.name/inside.description/inside.nodes\n- 用 **节点名** 链接覆盖 description 中的节点\n\n【JSON模板】\n${JSON_TEMPLATES.localMapRefresh}`,
+        u1: v => `Bạn là công cụ "Làm mới" bản đồ cục bộ TRPG. Khu vực hiện tại của {{user}} đã có bản đồ văn bản, nhưng cần cập nhật do tiến triển cốt truyện. Nhiệm vụ của bạn là dựa vào thế giới, cốt truyện, lịch sử và "Bản đồ cục bộ hiện tại", xuất ra inside JSON đã cập nhật.\n\n[LƯU Ý QUAN TRỌNG] TẤT CẢ NỘI DUNG XUẤT RA PHẢI BẰNG TIẾNG VIỆT (VIETNAMESE). KHÔNG XUẤT TIẾNG TRUNG.`,
+        a1: () => `Đã hiểu, tôi sẽ làm mới JSON bản đồ cục bộ mà không thay đổi chủ đề của khu vực. Xin hãy gửi bản đồ hiện tại và lịch sử.`,
+        u2: v => `OK, here is current local map and history.\n\n 【Bản đồ cục bộ hiện tại】\n${v.currentLocalMap ? JSON.stringify(v.currentLocalMap, null, 2) : 'Không có'}\n\n【Thiết lập Thế giới】\n${worldInfo}\n\n【Dàn ý Cốt truyện】\n${wrap('story_outline', v.storyOutline) || 'Không có'}\n\n【Thông tin Bản đồ lớn】\n${v.outdoorDescription || 'Không có'}\n\n【Lịch sử Chat】\n${history(v.historyCount)}\n\n【Yêu cầu đầu ra】\n- CHỈ xuất JSON hợp lệ.\n- Phải chứa inside.name/inside.description/inside.nodes\n- Dùng **Tên_nút** để liên kết các nút trong description\n\n【Mẫu JSON】\n${JSON_TEMPLATES.localMapRefresh}`,
         a2: () => `OK, localMapRefresh JSON generate start:`
     }
 };
