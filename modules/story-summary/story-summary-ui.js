@@ -104,6 +104,22 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
         '转折': 'Bước ngoặt', '点睛': 'Điểm nhấn', '氛围': 'Không khí' 
     };
 
+    const REVERSE_TREND_MAP = {
+        'Rạn nứt': '破裂', 'Chán ghét': '厌恶', 'Ác cảm': '反感',
+        'Xa lạ': '陌生', 'Hợp ý': '投缘', 'Thân mật': '亲密', 'Hòa quyện': '交融'
+    };
+    
+    const REVERSE_TYPE_MAP = { 
+        'Gặp gỡ': '相遇', 'Xung đột': '冲突', 'Tiết lộ': '揭示', 
+        'Lựa chọn': '抉择', 'Gắn kết': '羁绊', 'Chuyển biến': '转变', 
+        'Gỡ nút': '收束', 'Đời thường': '日常' 
+    };
+    
+    const REVERSE_WEIGHT_MAP = { 
+        'Cốt lõi': '核心', 'Tuyến chính': '主线', 
+        'Bước ngoặt': '转折', 'Điểm nhấn': '点睛', 'Không khí': '氛围' 
+    };
+
     // ═══════════════════════════════════════════════════════════════════════════
     // DOM Helpers
     // ═══════════════════════════════════════════════════════════════════════════
@@ -2213,8 +2229,8 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                         timeLabel: it.querySelector('.event-time').value.trim(),
                         summary: it.querySelector('.event-summary').value.trim(),
                         participants: it.querySelector('.event-participants').value.trim().split(/[,、，]/).map(s => s.trim()).filter(Boolean),
-                        type: it.querySelector('.event-type').value,
-                        weight: it.querySelector('.event-weight').value
+                        type: REVERSE_TYPE_MAP[it.querySelector('.event-type').value] || it.querySelector('.event-type').value,
+                        weight: REVERSE_WEIGHT_MAP[it.querySelector('.event-weight').value] || it.querySelector('.event-weight').value
                     }, oldMap.get(id));
                 }).filter(e => e.title || e.summary);
             } else if (section === 'characters') {
@@ -2229,7 +2245,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                     return preserveAddedAt({
                         from, to,
                         label: it.querySelector('.char-rel-label').value.trim(),
-                        trend: it.querySelector('.char-rel-trend').value
+                        trend: REVERSE_TREND_MAP[it.querySelector('.char-rel-trend').value] || it.querySelector('.char-rel-trend').value
                     }, oldRelMap.get(`${from}->${to}`));
                 }).filter(r => r.from && r.to);
 
@@ -2260,7 +2276,7 @@ Những ký ức này là chân thực, hãy ghi nhớ chúng một cách tự n
                         const s = parts[0];
                         const p = parts[1];
                         const o = parts[2];
-                        const trend = parts[3];
+                        const trend = REVERSE_TREND_MAP[parts[3]] || parts[3];
                         if (!s || !p) return null;
                         if (!o) return null;
                         const key = `${s}::${p}`;
