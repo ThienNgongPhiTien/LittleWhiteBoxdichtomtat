@@ -87,7 +87,7 @@ export async function embed(texts, options = {}) {
         );
     }
 
-    const { timeout = 30000, signal } = options;
+    const { timeout = 60000, signal } = options;
     const controller = new AbortController();
     let timedOut = false;
     const timeoutId = setTimeout(() => {
