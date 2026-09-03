@@ -12,7 +12,7 @@ import { buildBoundedRerankQuery, RERANK_QUERY_MAX_CHARS } from '../retrieval/re
 const MODULE_ID = 'reranker';
 const DEFAULT_RERANK_URL = 'https://api.siliconflow.cn/v1';
 const RERANK_MODEL = 'BAAI/bge-reranker-v2-m3';
-const DEFAULT_TIMEOUT = 15000;
+const DEFAULT_TIMEOUT = 60000;
 const MAX_DOCUMENTS = 100;  // API 限制
 const RERANK_BATCH_SIZE = 20;
 const RERANK_MAX_CONCURRENCY = 5;
@@ -378,7 +378,7 @@ export async function testRerankService(apiConfig = {}) {
 
     const key = getNextRerankKey(next.key);
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
     try {
         const baseUrl = resolveApiBaseUrl(
             String(next.url || DEFAULT_RERANK_URL),
