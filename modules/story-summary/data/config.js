@@ -116,7 +116,7 @@ Summary Specialist:
 - Ưu tiên viết thành 1 câu; Nếu thông tin thực sự quá nhiều thì có thể viết 2 câu, nhưng đừng tách thành mào đầu chung chung + bổ sung chi tiết.
 
 [Thang đo xu hướng mối quan hệ]
-Rạn nứt ← Chán ghét ← Ác cảm ← Xa lạ → Hợp ý → Thân mật → Hòa quyện
+破裂 ← 厌恶 ← 反感 ← 陌生 → 投缘 → 亲密 → 交融
 
 [Theo dõi quỹ đạo nhân vật]
 ├─ trajectory: Mô tả giai đoạn hiện tại (dưới 15 chữ)
@@ -135,7 +135,7 @@ Quy tắc cốt lõi:
    - isState: false -> Dữ kiện không cốt lõi / ký ức mềm có thể bị xóa đi do giới hạn dung lượng.
 4) Dữ kiện quan hệ:
    - BẮT BUỘC dùng định dạng vị ngữ nguyên bản tiếng Trung: "对X的看法" (X là người được nhắm đến).
-   - Bắt buộc có 'trend' (xu hướng): Rạn nứt | Chán ghét | Ác cảm | Xa lạ | Hợp ý | Thân mật | Hòa quyện
+   - Bắt buộc có 'trend' (xu hướng) bằng tiếng Trung: 破裂 | 厌恶 | 反感 | 陌生 | 投缘 | 亲密 | 交融
 5) Thu hồi (Xóa):
    - Để xóa dữ kiện, xuất ra: {s, p, retracted: true}
 6) Chuẩn hóa vị ngữ: Tái sử dụng vị ngữ đã có nếu có thể, không bịa thêm từ đồng nghĩa.
@@ -189,7 +189,7 @@ Trước khi tạo, hãy quan sát NGƯỜI DÙNG và phân tích cẩn thận:
 - isState: true=核心约束(位置/身份/生死/关系/稳定辨识性身体特征)，false=有容量上限会被清理
 - 外貌类统一使用谓词 p="身体特征"；只记录稳定、有辨识度的特征，不记录临时衣着、姿势、表情和普通伤势
 - "身体特征" 的 o 必须写当前完整值。由于相同 s+p 会覆盖旧值，新增特征时必须把已有特征一并写全，不能只写新增部分
-- Dữ kiện quan hệ: Vị ngữ (p) BẮT BUỘC giữ nguyên tiếng Trung là "对X的看法" (thay X bằng tên nhân vật được nhắm đến), bắt buộc điền trend (Rạn nứt|Chán ghét|Ác cảm|Xa lạ|Hợp ý|Thân mật|Hòa quyện)
+- Dữ kiện quan hệ: Vị ngữ (p) BẮT BUỘC giữ nguyên tiếng Trung là "对X的看法" (thay X bằng tên nhân vật được nhắm đến), bắt buộc điền trend bằng tiếng Trung (破裂|厌恶|反感|陌生|投缘|亲密|交融)
 - 删除: {s, p, retracted: true}，不需要 o 字段
 - 更新: {s, p, o, isState, trend?}
 - 谓词规范化: 复用已有谓词，不要发明同义词
